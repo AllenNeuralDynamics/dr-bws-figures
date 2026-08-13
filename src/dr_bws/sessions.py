@@ -1,12 +1,13 @@
-from typing import Literal
 import functools
 import logging
+from typing import Literal
 
 import lazynwb
 import polars as pl
 import pydantic
 import pydantic_settings
 import upath
+from polars._typing import FrameType
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +57,7 @@ def list_nwb_sources() -> tuple[str, ...]:
     logger.info(f"Found {len(sources)} NWB sources in {datacube_config.nwb_dir}")
     return tuple(sources)
 
-def ensure_id_cols(df: pl.DataFrame) -> pl.DataFrame:
+def ensure_id_cols(df: FrameType) -> FrameType:
     schema = df.lazy().collect_schema() # works if we pass a dataframe or lazyframe
     if "session_id" in schema and "subject_id" in schema:
         logger.debug("DataFrame already has a `session_id` and `subject_id` columns, skipping parsing from `_nwb_path`")
@@ -102,10 +103,26 @@ def filter_presets() -> dict[str, pl.Expr]:
         'templeton': templeton_ephys_filter(),
     }
 
+def get_session_ids_in_data_asset() -> list[str]:
+    try:
+        import aind_session
+    except ImportError:
+        raise ImportError("aind_session is required to check for sessions in the data asset. Please install it.")
+    try:
+        asset =  next(
+            d for d in reversed(aind_session.get_data_assets('dynamicrouting_datacube'))
+            if datacube_config.version in d.name
+        )
+    except StopIteration:
+        raise ValueError(f"No data asset found for version {datacube_config.version}.")
+    s3_dir = aind_session.get_data_asset_source_dir(asset.id)
+    return pl.read_parquet((s3_dir / 'session_table.parquet').as_posix(), columns=["session_id"])["session_id"].sort().to_list()
+
 @functools.cache
 def get_sessions(
     preset: Literal['brainwide', 'naive', 'templeton'] | None = 'brainwide',
     filter_expr: pl.Expr | None = None,
+    only_in_data_asset: bool = False,
 ) -> pl.DataFrame:
     """A DataFrame with 'session_id' and 'keywords'.
  
@@ -116,19 +133,25 @@ def get_sessions(
     None - all sessions in datacube
 
     If a custom `filter_expr` is passed, it will be applied to the NWB "session" table, which contains keywords, session_id and subject_id for filtering. The value of `preset` will be ignored.
+
+    If only_in_data_asset is True, a further filter will be applied to return only sessions present in the CO data asset. This requires credentials to check CO and S3.
     """
 
     if filter_expr is None:
         if preset and preset not in filter_presets():
             raise ValueError("Unknown filter preset. Use one of: 'brainwide', 'naive', 'templeton'")
         filter_expr = filter_presets().get(preset, pl.lit(True))
-    return (
+    filtered = (
         lazynwb.scan_nwb(list_nwb_sources(), "session")
         .pipe(ensure_id_cols)
         .select('session_id', 'keywords')
         .filter(filter_expr)
         .collect()
     )
+    if only_in_data_asset:
+        session_ids_in_data_asset = get_session_ids_in_data_asset()
+        filtered = filtered.filter(pl.col("session_id").is_in(session_ids_in_data_asset))
+    return filtered
 
 if __name__ == "__main__":
     import doctest
