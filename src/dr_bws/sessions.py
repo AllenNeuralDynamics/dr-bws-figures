@@ -68,7 +68,7 @@ def ensure_id_cols(df: pl.DataFrame) -> pl.DataFrame:
             pl.col("_nwb_path").str.split("/").list.get(-1).str.split(".").list.get(0).alias("session_id")
         )
     if "subject_id" not in schema:
-        df = df.with_columns(pl.col("session_id").split("_").list.get(0))
+        df = df.with_columns(pl.col("session_id").str.split("_").list.get(0).alias("subject_id"))
     return df
 
 def brainwide_ephys_filter() -> pl.Expr:
@@ -81,23 +81,30 @@ def brainwide_ephys_filter() -> pl.Expr:
 
 def naive_ephys_filter() -> pl.Expr:
     required = ("prod", "dynamic_routing", "task", "ephys", "ccf", "context_naive")
-    excluded = ("issues", "early_autorewards", ) 
+    excluded = ("issues", "early_autorewards") 
     return pl.all_horizontal(
         *[pl.col("keywords").list.contains(keyword) for keyword in required],
         *[~pl.col("keywords").list.contains(keyword) for keyword in excluded],
     )
     
 def templeton_ephys_filter() -> pl.Expr:
-    required = ("prod", "templeton", "task", "ephys", "ccf", "context_naive")
-    excluded = ("issues", "early_autorewards", ) 
+    required = ("prod", "templeton", "task", "ephys", "ccf")
+    excluded = ("issues", "early_autorewards") 
     return pl.all_horizontal(
         *[pl.col("keywords").list.contains(keyword) for keyword in required],
         *[~pl.col("keywords").list.contains(keyword) for keyword in excluded],
     )
 
+def filter_presets() -> dict[str, pl.Expr]:
+    return {
+        'brainwide': brainwide_ephys_filter(), 
+        'naive': naive_ephys_filter(), 
+        'templeton': templeton_ephys_filter(),
+    }
+
 @functools.cache
 def get_sessions(
-    preset: Literal['brainwide', 'naive'] | None = 'brainwide',
+    preset: Literal['brainwide', 'naive', 'templeton'] | None = 'brainwide',
     filter_expr: pl.Expr | None = None,
 ) -> pl.DataFrame:
     """A DataFrame with 'session_id' and 'keywords'.
@@ -110,15 +117,11 @@ def get_sessions(
 
     If a custom `filter_expr` is passed, it will be applied to the NWB "session" table, which contains keywords, session_id and subject_id for filtering. The value of `preset` will be ignored.
     """
-    presets = {
-        'brainwide': brainwide_ephys_filter(), 
-        'naive': naive_ephys_filter(), 
-        'templeton': templeton_ephys_filter(),
-    }
+
     if filter_expr is None:
-        if preset and preset not in presets:
+        if preset and preset not in filter_presets():
             raise ValueError("Unknown filter preset. Use one of: 'brainwide', 'naive', 'templeton'")
-        filter_expr = presets.get(preset, pl.lit(True))
+        filter_expr = filter_presets().get(preset, pl.lit(True))
     return (
         lazynwb.scan_nwb(list_nwb_sources(), "session")
         .pipe(ensure_id_cols)
