@@ -139,7 +139,9 @@ def brainwide_ephys_filter() -> pl.Expr:
     )
 
 def naive_ephys_filter() -> pl.Expr:
-    required = ("prod", "dynamic_routing", "task", "ephys", "ccf", "context naive") #TODO switch to "context_naive" when fixed in v0.0.290
+    required = ("dynamic_routing", "task", "ephys", "ccf", "context naive") 
+    # TODO prod should be included, but is incorrect
+    #TODO switch to "context_naive" (w/underscore) when fixed in v0.0.290
     excluded = ("issues", "templeton") # TODO add "brainwide_survey" when fixed in v0.0.290
     engaged_session_ids = (
         behavior_summary()
