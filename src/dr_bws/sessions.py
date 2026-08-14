@@ -1,8 +1,9 @@
 import functools
 import logging
+import os
 from typing import Literal
 
-import lazynwb
+import aind_session
 import polars as pl
 import pydantic
 import pydantic_settings
@@ -11,34 +12,59 @@ from polars._typing import FrameType
 
 logger = logging.getLogger(__name__)
 
+def pipeline_data_dir() -> upath.UPath:
+    return upath.UPath("/tmp/data")
+
+def capsule_data_dir() -> upath.UPath:
+    return upath.UPath("/root/capsule/data")
+
+@functools.cache
+def on_codeocean() -> bool:
+    return capsule_data_dir().exists() or is_pipeline()
+
+@functools.cache
+def is_pipeline() -> bool:
+    return pipeline_data_dir().exists() and bool(os.environ.get("AWS_BATCH_JOB_ID"))
+
 class DatacubeConfig(pydantic_settings.BaseSettings):
     model_config = pydantic.ConfigDict(validate_assignment=True)
 
     version: str = "v0.0.289"
-    use_cache: bool = True
-    s3_cache_dir: upath.UPath = upath.UPath("s3://aind-scratch-data/dynamic-routing/cache/", anon=True)
+    use_cache: bool = False
+    s3_cache_dir: upath.UPath = upath.UPath("s3://aind-scratch-data/dynamic-routing/cache", anon=True)
     
+    @property
+    def asset_dir(self) -> upath.UPath:
+        if on_codeocean():
+            data_dir = pipeline_data_dir() if is_pipeline() else capsule_data_dir() 
+            try:
+                datacube_dir = next(data_dir.glob("dynamicrouting_datacube*"))
+            except StopIteration:
+                raise FileNotFoundError(f"Could not find dynamicrouting_datacube data asset in {data_dir}")
+            return datacube_dir
+        # get S3 dir of datacube asset from CO API
+        return aind_session.get_data_asset_source_dir(
+            next(d for d in reversed(aind_session.get_data_assets('dynamicrouting_datacube')) if self.version in d.name).id
+        )
+
     @property
     def nwb_dir(self) -> upath.UPath:
         if self.use_cache:
             return self.s3_cache_dir / "nwb" / self.version 
-        else:
-            data_dir = upath.UPath("/root/capsule/data")
-            if not data_dir.exists():
-                raise FileNotFoundError("Could not find /root/capsule/data directory")
-            try:
-                return next(data_dir.glob("dynamicrouting_datacube*")) / "nwb"
-            except StopIteration:
-                raise FileNotFoundError("Could not find dynamicrouting_datacube data asset in /root/capsule/data")
+        return self.asset_dir / "nwb"
 
     @property
     def parquet_dir(self) -> upath.UPath:
         if self.use_cache:
-            return self.s3_cache_dir / "nwb_components" / self.version
+            return self.s3_cache_dir / "nwb_components" / self.version / "consolidated"
         else:
             return self.nwb_dir.parent / "consolidated"
             
 datacube_config = DatacubeConfig()
+
+def get_lf(name: str) -> pl.LazyFrame:
+    storage_options = {} if not datacube_config.use_cache else {"skip_signature": "true", "region": "us-west-2"}
+    return pl.scan_parquet((datacube_config.parquet_dir / f"{name}.parquet").as_posix(), storage_options=storage_options)
 
 def get_session_ids() -> list[str]:
     """Get a list of all session IDs.
@@ -72,25 +98,59 @@ def ensure_id_cols(df: FrameType) -> FrameType:
         df = df.with_columns(pl.col("session_id").str.split("_").list.get(0).alias("subject_id"))
     return df
 
+def behavior_summary(block_dprime_threshold: float = 1.0) -> pl.DataFrame:
+    return (
+        get_lf("performance")
+        .with_columns(
+            pl.col("n_contingent_rewards").gt(10).alias("is_engaged_block"),
+            pl.col("cross_modality_dprime").ge(block_dprime_threshold).alias("is_good_block"),
+        )
+        .group_by("session_id", "rewarded_modality")
+        .agg(
+            pl.col("is_engaged_block", "is_good_block").sum()
+        )
+        .group_by("session_id")
+        .agg(
+            pl.col("is_good_block").filter(pl.col("rewarded_modality") == "vis").first().alias("n_good_vis"),
+            pl.col("is_good_block").filter(pl.col("rewarded_modality") == "aud").first().alias("n_good_aud"),
+            pl.col("is_engaged_block").sum().alias("n_engaged"),
+        )
+    ).collect()   # Added return statement
+
 def brainwide_ephys_filter() -> pl.Expr:
-    required = ("prod", "brainwide_survey", "task", "ephys", "ccf", "good_behavior")
-    excluded = ("issues", "early_autorewards", "context_naive") # context_naive had bug - should be mut-ex with bws in future
+    required = ("prod", "brainwide_survey", "task", "ephys", "ccf") # good_behavior is incorrect - will be fixed in v0.0.290
+    excluded = ("issues", "context naive") # context_naive (w underscore) had bug - should be mutually exclusive with bws from >=v0.0.290
+    good_behavior_session_ids = (
+        behavior_summary(block_dprime_threshold=1.0)
+        .filter(
+            pl.col("n_good_aud").ge(2),
+            pl.col("n_good_vis").ge(2),
+        )
+    )["session_id"].to_list()
     return pl.all_horizontal(
         *[pl.col("keywords").list.contains(keyword) for keyword in required],
         *[~pl.col("keywords").list.contains(keyword) for keyword in excluded],
+        pl.col("session_id").is_in(good_behavior_session_ids)
     )
 
 def naive_ephys_filter() -> pl.Expr:
-    required = ("prod", "dynamic_routing", "task", "ephys", "ccf", "context_naive")
-    excluded = ("issues", "early_autorewards") 
+    required = ("prod", "dynamic_routing", "task", "ephys", "ccf", "context naive")
+    excluded = ("issues", "brainwide_survey", "templeton") 
+    engaged_session_ids = (
+        behavior_summary()
+        .filter(
+            pl.col("n_engaged").ge(4),
+        )
+    )["session_id"].to_list()
     return pl.all_horizontal(
         *[pl.col("keywords").list.contains(keyword) for keyword in required],
         *[~pl.col("keywords").list.contains(keyword) for keyword in excluded],
+        pl.col("session_id").is_in(engaged_session_ids),
     )
     
 def templeton_ephys_filter() -> pl.Expr:
     required = ("prod", "templeton", "task", "ephys", "ccf")
-    excluded = ("issues", "early_autorewards") 
+    excluded = ("issues", ) 
     return pl.all_horizontal(
         *[pl.col("keywords").list.contains(keyword) for keyword in required],
         *[~pl.col("keywords").list.contains(keyword) for keyword in excluded],
@@ -104,25 +164,13 @@ def filter_presets() -> dict[str, pl.Expr]:
     }
 
 def get_session_ids_in_data_asset() -> list[str]:
-    try:
-        import aind_session
-    except ImportError:
-        raise ImportError("aind_session is required to check for sessions in the data asset. Please install it.")
-    try:
-        asset =  next(
-            d for d in reversed(aind_session.get_data_assets('dynamicrouting_datacube'))
-            if datacube_config.version in d.name
-        )
-    except StopIteration:
-        raise ValueError(f"No data asset found for version {datacube_config.version}.")
-    s3_dir = aind_session.get_data_asset_source_dir(asset.id)
-    return pl.read_parquet((s3_dir / 'session_table.parquet').as_posix(), columns=["session_id"])["session_id"].sort().to_list()
+    return pl.read_parquet((datacube_config.asset_dir / 'session_table.parquet').as_posix(), columns=["session_id"])["session_id"].sort().to_list()
 
 @functools.cache
 def get_sessions(
     preset: Literal['brainwide', 'naive', 'templeton'] | None = 'brainwide',
     filter_expr: pl.Expr | None = None,
-    only_in_data_asset: bool = False,
+    only_in_data_asset: bool = True,
 ) -> pl.DataFrame:
     """A DataFrame with 'session_id' and 'keywords'.
  
@@ -136,16 +184,15 @@ def get_sessions(
 
     If only_in_data_asset is True, a further filter will be applied to return only sessions present in the CO data asset. This requires credentials to check CO and S3.
     """
-
     if filter_expr is None:
         if preset and preset not in filter_presets():
             raise ValueError("Unknown filter preset. Use one of: 'brainwide', 'naive', 'templeton'")
         filter_expr = filter_presets().get(preset, pl.lit(True))
     filtered = (
-        lazynwb.scan_nwb(list_nwb_sources(), "session")
+        get_lf("session")
         .pipe(ensure_id_cols)
-        .select('session_id', 'keywords')
         .filter(filter_expr)
+        .select('session_id', 'subject_id', 'keywords')
         .collect()
     )
     if only_in_data_asset:
