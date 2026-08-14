@@ -3,16 +3,12 @@
 import json
 from pathlib import Path
 
-import lazynwb
-
-from dr_bws.sessions import get_sessions, filter_presets
-
+from dr_bws.sessions import filter_presets, get_sessions
 
 OUTPUT_PATH = Path(__file__).resolve().parents[1] / "assets" / "session_ids.json"
 
 
 def dump_session_ids() -> None:
-    lazynwb.config.anon = True
     session_ids = {
         preset: sorted(get_sessions(preset)["session_id"].unique().to_list())
         for preset in filter_presets().keys()
