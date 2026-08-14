@@ -71,16 +71,6 @@ def get_lf(name: str) -> pl.LazyFrame:
     storage_options = {} if not datacube_config.use_cache else {"skip_signature": "true", "region": "us-west-2"}
     return pl.scan_parquet((datacube_config.parquet_dir / f"{name}.parquet").as_posix(), storage_options=storage_options)
 
-def get_session_ids() -> list[str]:
-    """Get a list of all session IDs.
-    
-    Examples
-    --------
-    >>> get_session_ids()[:2]
-    ['620263_2022-07-26', '620263_2022-07-27']
-    """
-    return sorted(session_id.stem.strip('.nwb').strip('.zarr') for session_id in datacube_config.nwb_dir.glob("*.nwb*"))
-
 @functools.cache
 def list_nwb_sources() -> tuple[str, ...]:
     """Get all file URIs."""
@@ -170,9 +160,6 @@ def filter_presets() -> dict[str, pl.Expr]:
         'templeton': templeton_ephys_filter(),
     }
 
-def get_session_ids_in_data_asset() -> list[str]:
-    return pl.read_parquet((datacube_config.asset_dir / 'session_table.parquet').as_posix(), columns=["session_id"])["session_id"].sort().to_list()
-
 @functools.cache
 def get_sessions(
     preset: Literal['brainwide', 'naive', 'templeton'] | None = 'brainwide',
@@ -203,7 +190,7 @@ def get_sessions(
         .collect()
     )
     if only_in_data_asset:
-        session_ids_in_data_asset = get_session_ids_in_data_asset()
+        session_ids_in_data_asset = pl.read_parquet((datacube_config.asset_dir / 'session_table.parquet').as_posix(), columns=["session_id"])["session_id"].sort().to_list()
         filtered = filtered.filter(pl.col("session_id").is_in(session_ids_in_data_asset))
     return filtered
 
