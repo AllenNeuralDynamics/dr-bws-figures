@@ -116,9 +116,9 @@ def behavior_summary(block_dprime_threshold: float = 1.0) -> pl.DataFrame:
         )
         .group_by("session_id")
         .agg(
-            pl.col("is_good_block").filter(pl.col("rewarded_modality") == "vis").first().alias("n_good_vis"),
-            pl.col("is_good_block").filter(pl.col("rewarded_modality") == "aud").first().alias("n_good_aud"),
-            pl.col("is_engaged_block").sum().alias("n_engaged"),
+            pl.col("is_good_block").filter(pl.col("rewarded_modality") == "vis").first().alias("n_good_vis_blocks"),
+            pl.col("is_good_block").filter(pl.col("rewarded_modality") == "aud").first().alias("n_good_aud_blocks"),
+            pl.col("is_engaged_block").sum().alias("n_engaged_blocks"),
         )
     ).collect()   # Added return statement
 
@@ -128,8 +128,8 @@ def brainwide_ephys_filter() -> pl.Expr:
     good_behavior_session_ids = (
         behavior_summary(block_dprime_threshold=1.0)
         .filter(
-            pl.col("n_good_aud").ge(2),
-            pl.col("n_good_vis").ge(2),
+            pl.col("n_good_aud_blocks").ge(2),
+            pl.col("n_good_vis_blocks").ge(2),
         )
     )["session_id"].to_list()
     return pl.all_horizontal(
@@ -139,12 +139,12 @@ def brainwide_ephys_filter() -> pl.Expr:
     )
 
 def naive_ephys_filter() -> pl.Expr:
-    required = ("prod", "dynamic_routing", "task", "ephys", "ccf", "context naive")
-    excluded = ("issues", "brainwide_survey", "templeton") 
+    required = ("prod", "dynamic_routing", "task", "ephys", "ccf", "context naive") #TODO switch to "context_naive" when fixed in v0.0.290
+    excluded = ("issues", "templeton") # TODO add "brainwide_survey" when fixed in v0.0.290
     engaged_session_ids = (
         behavior_summary()
         .filter(
-            pl.col("n_engaged").ge(4),
+            pl.col("n_engaged_blocks").ge(4),
         )
     )["session_id"].to_list()
     return pl.all_horizontal(
