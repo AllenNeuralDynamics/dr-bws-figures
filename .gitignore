@@ -166,3 +166,4 @@ cython_debug/
 .ruff_cache
 
 .scratch/
+__marimo__/
