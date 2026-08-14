@@ -43,10 +43,16 @@ class DatacubeConfig(pydantic_settings.BaseSettings):
         if on_codeocean():
             data_dir = pipeline_data_dir() if is_pipeline() else capsule_data_dir() 
             try:
-                datacube_dir = next(data_dir.glob("dynamicrouting_datacube*"))
+                datacube_dir = tuple(data_dir.glob("dynamicrouting_datacube*"))
             except StopIteration:
                 raise FileNotFoundError(f"Could not find dynamicrouting_datacube data asset in {data_dir}")
-            return datacube_dir
+            if not datacube_dir:
+                raise FileNotFoundError(f"Could not find dynamicrouting_datacube data asset in {data_dir}")
+            if len(datacube_dir) > 1:
+                choice = next((d for d in datacube_dir if self.version in d.name), datacube_dir[0])
+                logger.warning(f"Found multiple dynamicrouting_datacube data assets in {data_dir}, using: {choice} (set `datacube_config.version` to change)")
+                return choice
+            return datacube_dir[0]
         # get S3 dir of datacube asset from CO API
         return aind_session.get_data_asset_source_dir(
             next(d for d in reversed(aind_session.get_data_assets('dynamicrouting_datacube')) if self.version in d.name).id
