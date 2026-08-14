@@ -1,3 +1,4 @@
+import contextlib
 import functools
 import logging
 import os
@@ -20,11 +21,15 @@ def capsule_data_dir() -> upath.UPath:
 
 @functools.cache
 def on_codeocean() -> bool:
-    return capsule_data_dir().exists() or is_pipeline()
+    with contextlib.suppress(Exception):
+        return capsule_data_dir().exists() or is_pipeline()
+    return False
 
 @functools.cache
 def is_pipeline() -> bool:
-    return pipeline_data_dir().exists() and bool(os.environ.get("AWS_BATCH_JOB_ID"))
+    with contextlib.suppress(Exception):
+        return pipeline_data_dir().exists() and bool(os.environ.get("AWS_BATCH_JOB_ID"))
+    return False
 
 class DatacubeConfig(pydantic_settings.BaseSettings):
     model_config = pydantic.ConfigDict(validate_assignment=True)
