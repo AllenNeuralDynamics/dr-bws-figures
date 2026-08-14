@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - src/dr_bws/sessions.py
+      - .github/workflows/update-session-ids.yml
 
 permissions:
   contents: write
