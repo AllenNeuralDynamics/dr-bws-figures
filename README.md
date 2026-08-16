@@ -1,20 +1,28 @@
-Session IDs for the standard ephys sets are in [`assets/session_ids.json`](assets/session_ids.json). Read them locally with:
+Session metadata for the standard ephys sets is published in
+[`assets/sessions.csv`](assets/sessions.csv). The table contains the session and
+subject IDs, the standard session type, and whether the session passes the
+behavior filter. The available session types are `brainwide`, `naive`, and
+`templeton`.
+
+Read it directly from GitHub with pandas:
 
 ```python
-import json
-from urllib.request import urlopen
+import pandas as pd
 
-url = "https://raw.githubusercontent.com/allenneuraldynamics/dr-bws-figures/main/assets/session_ids.json"
-session_ids = json.load(urlopen(url))
-brainwide_ids = session_ids["brainwide"]
+url = "https://raw.githubusercontent.com/allenneuraldynamics/dr-bws-figures/main/assets/sessions.csv"
+sessions = pd.read_csv(url)
+brainwide_pass = sessions.query("is_behavior_pass and session_type == 'brainwide'")
 ```
 
-To apply the standard filters to the local session table and compare the
-results with the checked-in lists:
+Or with Polars:
 
-```sh
-uv run python scripts/compare_session_ids.py --verbose
+```python
+import polars as pl
+
+url = "https://raw.githubusercontent.com/allenneuraldynamics/dr-bws-figures/main/assets/sessions.csv"
+sessions = pl.read_csv(url)
+brainwide_pass = sessions.filter(
+    pl.col("is_behavior_pass"),
+    pl.col("session_type") == "brainwide",
+)
 ```
-
-The command reports missing and extra IDs and exits nonzero when a preset does
-not match. Use `--preset brainwide` (repeatable) to check only selected sets.
