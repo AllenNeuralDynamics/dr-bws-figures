@@ -1,21 +1,31 @@
 """Write session IDs for each standard ephys preset to assets/session_ids.json."""
 
-import json
 from pathlib import Path
 
-from dr_bws.sessions import filter_presets, get_sessions
+import polars as pl
 
-OUTPUT_PATH = Path(__file__).resolve().parents[1] / "assets" / "session_ids.json"
+from dr_bws import sessions
 
 
-def dump_session_ids() -> None:
-    session_ids = {
-        preset: sorted(get_sessions(preset)["session_id"].unique().to_list())
-        for preset in filter_presets().keys()
-    }
-    OUTPUT_PATH.parent.mkdir(parents=True, exist_ok=True)
-    OUTPUT_PATH.write_text(json.dumps(session_ids, indent=2) + "\n")
+def session_table() -> pl.DataFrame:
+    dfs = []
+    for session_type in sessions.filter_functions():
+        good = sessions.get_sessions(session_type).with_columns(pl.lit(True).alias("is_behavior_pass"))
+        all = sessions.get_sessions(session_type, with_behavior_filter=False)
+        dfs.extend([df.with_columns(session_type=pl.lit(session_type)) for df in (good, all)])
+    return (
+        pl.concat(dfs, how='diagonal')
+        .drop('keywords')
+        .with_columns(
+            pl.col("is_behavior_pass").fill_null(pl.lit(False)),
+        )
+        .sort("session_id")
+    )
 
+def dump_session_table() -> None:
+    output_dir = Path(__file__).resolve().parents[1] / "assets"
+    output_dir.mkdir(parents=True, exist_ok=True)
+    session_table().write_csv(output_dir / "sessions.csv")
 
 if __name__ == "__main__":
-    dump_session_ids()
+    dump_session_table()
