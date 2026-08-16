@@ -31,8 +31,8 @@ def session_table() -> pl.DataFrame:
         )
         .sort("session_id")
     )
-    assert df["session_type"].is_null().is_empty()
-    assert df["is_behavior_pass"].is_null().is_empty()
+    assert df["session_type"].null_count() == 0
+    assert df["is_behavior_pass"].null_count() == 0
     return df
 
 def dump_session_table() -> None:
