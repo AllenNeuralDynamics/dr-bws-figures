@@ -1,0 +1,101 @@
+{
+  "version": "1",
+  "metadata": {
+    "marimo_version": "0.23.16",
+    "script_metadata_hash": "1fd018bd61b456b2275169e8acbc7b28"
+  },
+  "cells": [
+    {
+      "id": "Hbol",
+      "code_hash": "86ffefbef1b6cfb4b080460a23d66427",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stdout",
+          "text": "(URN) connected to server\nLogin sent with ID: ef4e0b2c, copy this ID into the renderer to connect.\n",
+          "mimetype": "text/plain"
+        }
+      ]
+    },
+    {
+      "id": "MJUe",
+      "code_hash": "27aa28385a17f70f4097023b793a4cfb",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "vblA",
+      "code_hash": "fb1795ed227f24e7f1fa844e679c2ba8",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "bkHC",
+      "code_hash": "ba2c817bd405540842c94b7459cf3ebf",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "lEQa",
+      "code_hash": null,
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "lemC",
+      "code_hash": "e614487687ccc89c57b4b793c8caea5b",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<pre class='text-xs'>PosixPath(&#x27;/Users/benh/github/dr-bws-figures/figures/fig1/probe-tracks/probe_tracks_snapshot.png&#x27;)</pre>"
+          }
+        }
+      ],
+      "console": [
+        {
+          "type": "stream",
+          "name": "stdout",
+          "text": "(Camera receive) Camera CameraMain received an image\n(Camera receive) CameraMain complete\n",
+          "mimetype": "text/plain"
+        }
+      ]
+    }
+  ]
+}
