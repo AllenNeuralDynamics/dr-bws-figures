@@ -1,3 +1,13 @@
+# /// script
+# dependencies = [
+#     "dr-bws",
+#     "polars",
+# ]
+# requires-python = ">=3.11"
+#
+# [tool.uv.sources]
+# dr-bws = { git = "https://github.com/AllenNeuralDynamics/dr-bws-figures" }
+# ///
 """Write session IDs for each standard ephys preset to assets/session_ids.json."""
 
 from pathlib import Path
