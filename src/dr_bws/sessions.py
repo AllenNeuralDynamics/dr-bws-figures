@@ -3,6 +3,7 @@ import functools
 import logging
 import os
 from typing import Literal
+from collections.abc import Callable
 
 import aind_session
 import polars as pl
@@ -118,76 +119,99 @@ def behavior_summary(block_dprime_threshold: float = 1.0) -> pl.DataFrame:
         )
     ).collect()   # Added return statement
 
-def brainwide_ephys_filter() -> pl.Expr:
+def brainwide_ephys_filter(with_behavior_filter: bool = True) -> pl.Expr:
     required = ("prod", "brainwide_survey", "task", "ephys", "ccf") # good_behavior is incorrect - will be fixed in v0.0.290
     excluded = ("issues", "context naive") # context_naive (w underscore) had bug - should be mutually exclusive with bws from >=v0.0.290
-    good_behavior_session_ids = (
-        behavior_summary(block_dprime_threshold=1.0)
-        .filter(
-            pl.col("n_good_aud_blocks").ge(2),
-            pl.col("n_good_vis_blocks").ge(2),
-        )
-    )["session_id"].to_list()
+    if with_behavior_filter:
+        good_behavior_session_ids = (
+            behavior_summary(block_dprime_threshold=1.0)
+            .filter(
+                pl.col("n_good_aud_blocks").ge(2),
+                pl.col("n_good_vis_blocks").ge(2),
+            )
+        )["session_id"].to_list()
+    else:
+        good_behavior_session_ids = None
     return pl.all_horizontal(
         *[pl.col("keywords").list.contains(keyword) for keyword in required],
         *[~pl.col("keywords").list.contains(keyword) for keyword in excluded],
-        pl.col("session_id").is_in(good_behavior_session_ids)
+        pl.col("session_id").is_in(good_behavior_session_ids) if with_behavior_filter else pl.lit(True)
     )
 
-def naive_ephys_filter() -> pl.Expr:
+def naive_ephys_filter(with_behavior_filter: bool = True) -> pl.Expr:
     required = ("dynamic_routing", "task", "ephys", "ccf", "context naive") 
     # TODO prod should be included, but is incorrect
     #TODO switch to "context_naive" (w/underscore) when fixed in v0.0.290
     excluded = ("issues", "templeton") # TODO add "brainwide_survey" when fixed in v0.0.290
-    engaged_session_ids = (
-        behavior_summary()
-        .filter(
-            pl.col("n_engaged_blocks").ge(4),
-        )
-    )["session_id"].to_list()
+    if with_behavior_filter:
+        engaged_session_ids = (
+            behavior_summary()
+            .filter(
+                pl.col("n_engaged_blocks").ge(4),
+            )
+        )["session_id"].to_list()
+    else:
+        engaged_session_ids = []
     return pl.all_horizontal(
         *[pl.col("keywords").list.contains(keyword) for keyword in required],
         *[~pl.col("keywords").list.contains(keyword) for keyword in excluded],
-        pl.col("session_id").is_in(engaged_session_ids),
+        pl.col("session_id").is_in(engaged_session_ids) if with_behavior_filter else pl.lit(True),
     )
     
-def templeton_ephys_filter() -> pl.Expr:
+def templeton_ephys_filter(with_behavior_filter: bool = True) -> pl.Expr:
     required = ("prod", "templeton", "task", "ephys", "ccf")
     excluded = ("issues", ) 
+    if with_behavior_filter:
+        good_behavior_session_ids = (
+            get_lf("performance")
+            .filter(
+                pl.col('cross_modality_dprime').is_null(),
+                pl.col('aud_dprime').ge(1.0) | pl.col('vis_dprime').ge(1.0),
+            )
+        ).collect()["session_id"].to_list()
+    else:
+        good_behavior_session_ids = []
     return pl.all_horizontal(
         *[pl.col("keywords").list.contains(keyword) for keyword in required],
         *[~pl.col("keywords").list.contains(keyword) for keyword in excluded],
+        pl.col("session_id").is_in(good_behavior_session_ids) if with_behavior_filter else pl.lit(True),
     )
 
-def filter_presets() -> dict[str, pl.Expr]:
+def filter_functions() -> dict[str, Callable[[bool], pl.Expr]]:
+    """Return a dict of filter functions for each session_type. Each function has signature (with_behavior_filter: bool = True) -> pl.Expr."""
     return {
-        'brainwide': brainwide_ephys_filter(), 
-        'naive': naive_ephys_filter(), 
-        'templeton': templeton_ephys_filter(),
+        'brainwide': brainwide_ephys_filter, 
+        'naive': naive_ephys_filter, 
+        'templeton': templeton_ephys_filter,
     }
 
 @functools.cache
 def get_sessions(
-    preset: Literal['brainwide', 'naive', 'templeton'] | None = 'brainwide',
-    filter_expr: pl.Expr | None = None,
+    session_type: Literal['brainwide', 'naive', 'templeton'] | None = 'brainwide',
+    with_behavior_filter: bool = True,
     only_in_data_asset: bool = True,
+    filter_expr: pl.Expr | None = None,
 ) -> pl.DataFrame:
     """A DataFrame with 'session_id' and 'keywords'.
  
     Options:
-    'brainwide' (default) - standard brainwide survey ephys sessions, passing "good behavior" criterion.
+    'brainwide' (default) - standard brainwide survey ephys sessions
     'naive' - context naive dynamic routing ephys sessions.
     'templeton' - Templeton ephys sessions.
     None - all sessions in datacube
 
-    If a custom `filter_expr` is passed, it will be applied to the NWB "session" table, which contains keywords, session_id and subject_id for filtering. The value of `preset` will be ignored.
+    If `with_behavior_filter` is True, a standard behavioral filter for each session type will be applied.
+
+    If a custom `filter_expr` is passed, it will be applied to the NWB "session" table, which contains keywords, session_id and subject_id for filtering. The value of `session_type` will be ignored.
 
     If only_in_data_asset is True, a further filter will be applied to return only sessions present in the CO data asset. This requires credentials to check CO and S3.
     """
     if filter_expr is None:
-        if preset and preset not in filter_presets():
-            raise ValueError("Unknown filter preset. Use one of: 'brainwide', 'naive', 'templeton'")
-        filter_expr = filter_presets().get(preset, pl.lit(True))
+        if not session_type:
+            raise ValueError("If `filter_expr` is None, a valid `session_type` must be provided.")
+        elif session_type not in filter_functions():
+            raise ValueError(f"Unknown filter session_type. Use one of: {list(filter_functions().keys())}")
+        filter_expr = filter_functions()[session_type](with_behavior_filter)
     filtered = (
         get_lf("session")
         .pipe(ensure_id_cols)
