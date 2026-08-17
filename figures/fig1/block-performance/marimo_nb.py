@@ -42,7 +42,7 @@ def _():
 
     datacube_config.use_cache = True
 
-    asset_dir = (
+    results_dir = (
         pathlib.Path(__file__).resolve().parent
         if not on_codeocean()
         else pathlib.Path("/root/capsule/results")
@@ -52,7 +52,6 @@ def _():
     subject_traces = True
     error_bars = "ci95"
     return (
-        asset_dir,
         error_bars,
         first_block_aud,
         get_lf,
@@ -60,6 +59,7 @@ def _():
         np,
         pl,
         plt,
+        results_dir,
         subject_traces,
     )
 
@@ -78,7 +78,7 @@ def _(get_lf, get_session_ids_from_github, pl):
 
 
 @app.cell
-def _(asset_dir, get_lf, pl, sessions):
+def _(get_lf, pl, results_dir, sessions):
     target_response_rate = (
         get_lf("performance")
         .join(sessions.lazy(), on="session_id", how="inner")
@@ -103,13 +103,13 @@ def _(asset_dir, get_lf, pl, sessions):
         .sort("session_id", "isfirst_block_aud", "block_index", "rewarded_modality")
         .collect()
     )
-    target_response_rate.write_csv(asset_dir / "block_perf.csv")
+    target_response_rate.write_csv(results_dir / "block_perf.csv")
     target_response_rate
     return (target_response_rate,)
 
 
 @app.cell
-def _(asset_dir, pl, target_response_rate):
+def _(pl, results_dir, target_response_rate):
     target_response_rate_agg = (
         target_response_rate.group_by(
             "subject_id", "block_index", "rewarded_modality", "target", "isfirst_block_aud"
@@ -135,7 +135,7 @@ def _(asset_dir, pl, target_response_rate):
         )
         .sort("isfirst_block_aud", "block_index", "rewarded_modality")
     )
-    target_response_rate_agg.write_csv(asset_dir / "block_perf_agg.csv")
+    target_response_rate_agg.write_csv(results_dir / "block_perf_agg.csv")
     target_response_rate_agg
     return (target_response_rate_agg,)
 
@@ -211,7 +211,6 @@ def _():
 
 @app.cell
 def _(
-    asset_dir,
     colors,
     error_bars,
     figure_kwargs,
@@ -220,6 +219,7 @@ def _(
     np,
     pl,
     plt,
+    results_dir,
     subject_traces,
     target_response_rate,
 ):
@@ -308,14 +308,13 @@ def _(
         else f"{_targets[0].capitalize()} target response probability",
         ylim=(0, 1.05),
     )
-    _fig.savefig(asset_dir / "response-probability.svg")
+    _fig.savefig(results_dir / "response-probability.svg")
     _fig
     return
 
 
 @app.cell
 def _(
-    asset_dir,
     error_bars,
     figure_kwargs,
     first_block_aud,
@@ -323,6 +322,7 @@ def _(
     np,
     pl,
     plt,
+    results_dir,
     subject_traces,
     target_response_rate,
 ):
@@ -398,14 +398,13 @@ def _(
         ylim=(-3.5, 3.5),
     )
     _ax.axhline(0, lw=0.5, zorder=0, c="grey")
-    _fig.savefig(asset_dir / "cross-modality-dprime.svg")
+    _fig.savefig(results_dir / "cross-modality-dprime.svg")
     _fig
     return
 
 
 @app.cell
 def _(
-    asset_dir,
     colors,
     error_bars,
     figure_kwargs,
@@ -414,6 +413,7 @@ def _(
     np,
     pl,
     plt,
+    results_dir,
     subject_traces,
     target_response_rate,
 ):
@@ -508,7 +508,7 @@ def _(
         ylim=(-0.99, 4),
     )
     _ax.axhline(0, lw=0.5, zorder=0, c="grey")
-    _fig.savefig(asset_dir / "intramodal-dprime.svg")
+    _fig.savefig(results_dir / "intramodal-dprime.svg")
     _fig
     return
 

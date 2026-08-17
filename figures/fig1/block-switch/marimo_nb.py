@@ -38,19 +38,19 @@ def _():
 
     datacube_config.use_cache = True
 
-    asset_dir = (
+    results_dir = (
         pathlib.Path(__file__).resolve().parent
         if not on_codeocean()
         else pathlib.Path("/root/capsule/results")
     )
     return (
         Iterable,
-        asset_dir,
         get_lf,
         get_session_ids_from_github,
         np,
         pl,
         plt,
+        results_dir,
     )
 
 
@@ -555,9 +555,9 @@ def _(Iterable, np, pl, plt):
 
 
 @app.cell
-def _(asset_dir, plot, trials):
+def _(plot, results_dir, trials):
     fig = plot(trials, late_autorewards=None)  # both targets
-    fig.savefig(asset_dir / "block-switch.svg")
+    fig.savefig(results_dir / "block-switch.svg")
     return
 
 

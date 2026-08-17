@@ -31,25 +31,25 @@ def _():
 
     datacube_config.use_cache = True
 
-    asset_dir = (
+    results_dir = (
         pathlib.Path(__file__).resolve().parent
         if not on_codeocean()
         else pathlib.Path("/root/capsule/results")
     )
     return (
-        asset_dir,
         contextlib,
         get_lf,
         get_session_ids_from_github,
         pl,
+        results_dir,
         time,
         urchin,
     )
 
 
 @app.cell
-def _(contextlib, pl, time, urchin):
-    urchin.setup(standalone=True)
+def _(contextlib, time, urchin):
+    urchin.setup()
     urchin.ccf25.load()
 
     def clear_all():
@@ -59,7 +59,7 @@ def _(contextlib, pl, time, urchin):
             for p in globals().get("probes", ()):
                 p.delete()
             urchin.probes.clear()
-            
+        
     # must wait for session to open in browser before continuing
     time.sleep(6)
 
@@ -67,6 +67,7 @@ def _(contextlib, pl, time, urchin):
     urchin.ccf25.grey.set_material("transparent-lit")
     urchin.ccf25.grey.set_alpha(0.15)
     urchin.ccf25.grey.set_visibility(True)
+    return
 
 
 @app.cell
@@ -134,6 +135,7 @@ def _(electrodes_df, pl):
     print(f"n subjects: {_df['subject_id'].n_unique()}")
     print(f"n sessions: {_df['session_id'].n_unique()}")
     print(f"n insertions: {_df.unique(['session_id', 'group_name']).height}")
+    return
 
 
 @app.cell
@@ -166,6 +168,7 @@ def _(electrodes_df, particles, pl):
     particles.set_colors(points_df['color'].to_list())
     particles.set_sizes(points_df['size'].to_list())
     points_df
+    return
 
 
 @app.cell
@@ -192,10 +195,11 @@ def _(electrodes_df, pl, probes: "list[urchin.probes.Probe]", urchin):
             .to_numpy().tolist()
         )
     )
+    return
 
 
 @app.cell
-async def _(asset_dir, urchin):
+async def _(results_dir, urchin):
     # more dorsal:
     urchin.camera.main.set_rotation([20,39, 225])
     urchin.camera.main.set_zoom(40)
@@ -204,12 +208,13 @@ async def _(asset_dir, urchin):
     urchin.camera.main.set_zoom(45)
 
     urchin.camera.main.set_mode('perspective')
-    snapshot_path = asset_dir / "urchin.png"
+    snapshot_path = results_dir / "urchin.png"
     await urchin.camera.main.screenshot(
         size=[2200, 1800],
         filename=str(snapshot_path),
     )
     await urchin.camera.main.screenshot()
+    return
 
 
 if __name__ == "__main__":
