@@ -39,6 +39,7 @@ def _(get_lf, get_session_ids_from_github, pl):
             "session_id",
             pl.col("keywords").list.contains("first_block_aud").alias("is_first_block_aud"),
         )
+        .collect()
     )
     trials = (
         get_lf("trials").filter(
