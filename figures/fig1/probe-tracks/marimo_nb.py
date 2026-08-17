@@ -28,7 +28,7 @@ def _(points):
     import oursin as urchin
     import polars as pl
 
-    from dr_bws.datacube import get_lf, get_sessions
+    from dr_bws.datacube import get_lf, get_session_ids_from_github
 
     urchin.setup()
     urchin.ccf25.load()
@@ -57,20 +57,15 @@ def _(points):
     urchin.ccf25.grey.set_material("transparent-lit")
     urchin.ccf25.grey.set_alpha(0.15)
     urchin.ccf25.grey.set_visibility(True)
-    return get_lf, get_sessions, np, pathlib, pl, urchin
+    return get_lf, get_session_ids_from_github, np, pathlib, pl, urchin
 
-
-@app.cell
-def _(get_sessions):
-    sessions = get_sessions("brainwide")
-    return (sessions,)
 
 
 @app.cell
-def _(get_lf, pl, sessions):
+def _(get_lf, pl, get_session_ids_from_github):
     probes = (
         get_lf("electrodes")
-        .join(sessions.lazy(), on="session_id", how="semi")
+        .filter(pl.col("session_id").is_in(get_session_ids_from_github("brainwide")))
         .collect()
         .drop_nulls(["x", "y", "z"])
         .with_columns(

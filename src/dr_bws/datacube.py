@@ -224,6 +224,21 @@ def get_sessions(
         filtered = filtered.filter(pl.col("session_id").is_in(session_ids_in_data_asset))
     return filtered
 
+def get_session_ids_from_github(
+    session_type: Literal['brainwide', 'naive', 'templeton'] | None = 'brainwide', 
+    with_behavior_filter: bool = True, 
+) -> list[str]:
+    """Return a list of session IDs for the given session type, without requiring credentials to access the CO data asset."""
+    if session_type is None:
+        filter_expr = pl.lit(True)
+    else:
+        filter_expr = pl.col("session_type") == session_type
+    if with_behavior_filter:
+        filter_expr = filter_expr & pl.col("is_behavior_pass")
+    return pl.read_csv(
+        f"https://raw.githubusercontent.com/AllenNeuralDynamics/dr-bws-figures/main/assets/datacube_sessions.csv"
+    ).filter(filter_expr)["session_id"].sort().to_list()
+
 if __name__ == "__main__":
     import doctest
     doctest.testmod()

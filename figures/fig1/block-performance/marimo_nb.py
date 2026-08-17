@@ -24,17 +24,21 @@ def _():
 
     import polars as pl
 
-    from dr_bws.datacube import get_lf, get_sessions
+    from dr_bws.datacube import get_lf, get_session_ids_from_github
 
     asset_dir = (p := pathlib.Path(__file__)).parent
-    return asset_dir, get_lf, get_sessions, pl
+    return asset_dir, get_lf, get_session_ids_from_github, pl
 
 
-@app.cell
-def _(get_sessions, pl):
-    sessions = get_sessions("brainwide").select(
-        "session_id",
-        pl.col("keywords").list.contains("first_block_aud").alias("is_first_block_aud"),
+@app.cell   
+def _(get_lf, get_session_ids_from_github, pl):
+    sessions = (
+        get_lf("session")
+        .filter(pl.col("session_id").is_in(get_session_ids_from_github("brainwide")))
+        .select(
+            "session_id",
+            pl.col("keywords").list.contains("first_block_aud").alias("is_first_block_aud"),
+        )
     )
     return (sessions,)
 
