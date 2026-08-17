@@ -21,11 +21,9 @@ app = marimo.App(width="full")
 @app.cell
 def _():
     import contextlib
-    import os
     import pathlib
     import time
 
-    import numpy as np
     import oursin as urchin
     import polars as pl
 
@@ -69,7 +67,6 @@ def _(contextlib, pl, time, urchin):
     urchin.ccf25.grey.set_material("transparent-lit")
     urchin.ccf25.grey.set_alpha(0.15)
     urchin.ccf25.grey.set_visibility(True)
-    return
 
 
 @app.cell
@@ -137,7 +134,6 @@ def _(electrodes_df, pl):
     print(f"n subjects: {_df['subject_id'].n_unique()}")
     print(f"n sessions: {_df['session_id'].n_unique()}")
     print(f"n insertions: {_df.unique(['session_id', 'group_name']).height}")
-    return
 
 
 @app.cell
@@ -170,7 +166,6 @@ def _(electrodes_df, particles, pl):
     particles.set_colors(points_df['color'].to_list())
     particles.set_sizes(points_df['size'].to_list())
     points_df
-    return
 
 
 @app.cell
@@ -197,7 +192,6 @@ def _(electrodes_df, pl, probes: "list[urchin.probes.Probe]", urchin):
             .to_numpy().tolist()
         )
     )
-    return
 
 
 @app.cell
@@ -216,7 +210,6 @@ async def _(asset_dir, urchin):
         filename=str(snapshot_path),
     )
     await urchin.camera.main.screenshot()
-    return
 
 
 if __name__ == "__main__":

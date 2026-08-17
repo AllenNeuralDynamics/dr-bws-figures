@@ -116,7 +116,6 @@ def _(target_response_rate_agg):
             tooltip=["response_rate_mean", "rewarded_modality", "n_subjects"],
         ).properties(width=200)
     )
-    return
 
 
 @app.cell
@@ -138,7 +137,6 @@ def _(pl, target_response_rate_agg):
         )
         .properties(width=200)
     )
-    return
 
 
 @app.cell
@@ -152,6 +150,7 @@ def _():
 
 @app.cell
 def _(
+    asset_dir,
     error_bars,
     first_block_aud,
     pl,
@@ -247,13 +246,8 @@ def _(
     _ax.grid(axis="y", alpha=0.25)
     if len(targets) == 2:
         _ax.legend(frameon=False)
+    _fig.savefig(asset_dir / "block-dprime.svg")
     _fig
-    return
-
-
-@app.cell
-def _():
-    return
 
 
 if __name__ == "__main__":
