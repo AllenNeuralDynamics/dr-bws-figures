@@ -544,9 +544,9 @@ def _(pl):
 
 
 @app.cell
-def _(plot, trials):
-    plot(trials, late_autorewards=None)  # both targets
-
+def _(asset_dir, plot, trials):
+    fig = plot(trials, late_autorewards=None)  # both targets
+    fig.savefig(asset_dir / "block-switch.svg")
 
 @app.cell
 def _():
