@@ -99,7 +99,7 @@ def _(asset_dir, get_lf, pl, sessions):
         .sort("session_id", "isfirst_block_aud", "block_index", "rewarded_modality")
         .collect()
     )
-    target_response_rate.write_csv(asset_dir / "target_response_rate.csv")
+    target_response_rate.write_csv(asset_dir / "block_perf.csv")
     target_response_rate
     return (target_response_rate,)
 
@@ -131,7 +131,7 @@ def _(asset_dir, pl, target_response_rate):
         )
         .sort("isfirst_block_aud", "block_index", "rewarded_modality")
     )
-    target_response_rate_agg.write_csv(asset_dir / "target_response_rate_agg.csv")
+    target_response_rate_agg.write_csv(asset_dir / "block_perf_agg.csv")
     target_response_rate_agg
     return (target_response_rate_agg,)
 
@@ -299,12 +299,12 @@ def _(
 
     format_ax(_ax, _subject_data, _targets)
     _ax.set(
-        ylabel="Response rate"
+        ylabel="Response probability"
         if len(_targets) == 2
-        else f"{_targets[0].capitalize()} target response rate",
+        else f"{_targets[0].capitalize()} target response probability",
         ylim=(0, 1.05),
     )
-    _fig.savefig(asset_dir / "response-rate.svg")
+    _fig.savefig(asset_dir / "response-probability.svg")
     _fig
     return
 

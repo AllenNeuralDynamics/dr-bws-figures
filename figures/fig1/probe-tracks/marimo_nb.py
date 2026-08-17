@@ -49,7 +49,7 @@ def _():
 
 @app.cell
 def _(contextlib, pl, time, urchin):
-    urchin.setup()
+    urchin.setup(standalone=True)
     urchin.ccf25.load()
 
     def clear_all():

@@ -99,9 +99,9 @@ def _(pl):
         ax.set_xlim([-preTrials - 0.5, postTrials + 0.5])
         ax.set_ylim([0, 1.01])
         ax.set_xlabel(
-            "n stim presentations\nfrom context change",
+            "N stim presentations\nfrom context change",
         )
-        ax.set_ylabel("response probability")
+        ax.set_ylabel("Response probability")
         ax.tick_params(direction="out", top=False, right=False)
 
         # ax.legend(bbox_to_anchor=(1,1),loc='upper left')
@@ -450,8 +450,8 @@ def _(pl):
                 ax.set_aspect(1)
                 ax.set_yticks([0, 0.5, 1])
                 ax.set_xticks([0, 0.5, 1])
-                ax.set_ylabel("response probability\nlast rewarded")
-                ax.set_xlabel("response probability\nfirst unrewarded")
+                ax.set_ylabel("Response probability\nlast rewarded")
+                ax.set_xlabel("Response probability\nfirst unrewarded")
             else:
                 xpos = (0, 1)
 
@@ -481,7 +481,7 @@ def _(pl):
                     clip_on=False,
                 )
                 # ax.plot(xpos, [np.median(y[:, 0]), np.median(y[:, -1])], 'k', label=stimLbl, zorder=99, clip_on=False)
-                ax.set_ylabel("response probability")
+                ax.set_ylabel("Response probability")
                 lower = np.full(len(x), np.nan)
                 upper = np.full(len(x), np.nan)
                 for i in range(len(x)):
