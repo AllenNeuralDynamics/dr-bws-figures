@@ -36,6 +36,10 @@ def _():
 
     matplotlib.style.use("default")
 
+    plt.rcParams["font.family"] = "Arial"
+    plt.rcParams["font.size"] = 8
+    plt.rcParams["pdf.fonttype"] = 42
+
     datacube_config.use_cache = True
 
     asset_dir = (

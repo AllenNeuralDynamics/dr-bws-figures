@@ -22,10 +22,19 @@ app = marimo.App(width="full", auto_download=["html"])
 def _():
     import os
     import pathlib
+    from collections.abc import Iterable
 
     import polars as pl
-
+    import matplotlib.pyplot as plt
+    import matplotlib.style
+    import numpy as np
     from dr_bws.datacube import datacube_config, get_lf, get_session_ids_from_github, on_codeocean
+
+    matplotlib.style.use("default")
+
+    plt.rcParams["font.family"] = "Arial"
+    plt.rcParams["font.size"] = 8
+    plt.rcParams["pdf.fonttype"] = 42
 
     datacube_config.use_cache = True
 
@@ -34,7 +43,15 @@ def _():
         if not on_codeocean()
         else pathlib.Path("/root/capsule/results")
     )
-    return asset_dir, get_lf, get_session_ids_from_github, pl
+    return (
+        Iterable,
+        asset_dir,
+        get_lf,
+        get_session_ids_from_github,
+        np,
+        pl,
+        plt,
+    )
 
 
 @app.cell
@@ -60,16 +77,7 @@ def _(get_lf, get_session_ids_from_github, pl):
 
 
 @app.cell
-def _(pl):
-    from collections.abc import Iterable
-
-    import matplotlib.pyplot as plt
-    import numpy as np
-
-    plt.rcParams["font.family"] = "Arial"
-    plt.rcParams["font.size"] = 8
-    plt.rcParams["pdf.fonttype"] = 42
-
+def _(Iterable, np, pl, plt):
     def format_ax(
         ax,
         ax_idx: int | None,
