@@ -1,5 +1,5 @@
 # /// script
-# requires-python = ">=3.11"
+# requires-python = "3.11"
 # dependencies = [
 #     "marimo>=0.23.16",
 #     "numpy==2.4.6",
@@ -15,11 +15,11 @@
 import marimo
 
 __generated_with = "0.23.16"
-app = marimo.App()
+app = marimo.App(width="full")
 
 
 @app.cell
-def _(points):
+def _():
     import contextlib
     import pathlib
     import time
@@ -28,25 +28,29 @@ def _(points):
     import oursin as urchin
     import polars as pl
 
-    from dr_bws.datacube import get_lf, get_session_ids_from_github
+    from dr_bws.datacube import datacube_config, get_lf, get_session_ids_from_github
+
+    datacube_config.use_cache = True
 
     urchin.setup()
     urchin.ccf25.load()
 
     def clear_all():
         with contextlib.suppress(NameError):
-            points.delete()
             urchin.particles.clear()
         with contextlib.suppress(NameError):
             for p in globals().get("probes", ()):
                 p.delete()
             urchin.probes.clear()
 
-    ccf_df = pl.read_csv(
-        "https://raw.githubusercontent.com/cortex-lab/allenCCF/refs/heads/master/structure_tree_safe_2017.csv"
-    ).with_columns(
-        color_hex_triplet=pl.concat_str(
-            pl.lit("#"), pl.col("color_hex_triplet").str.to_lowercase()
+    ccf_df = (
+        pl.read_csv(
+            "https://raw.githubusercontent.com/cortex-lab/allenCCF/refs/heads/master/structure_tree_safe_2017.csv"
+        )
+        .with_columns(
+            color_hex_triplet=pl.concat_str(
+                pl.lit("#"), pl.col("color_hex_triplet").str.to_lowercase()
+            )
         )
     )
 
@@ -57,17 +61,26 @@ def _(points):
     urchin.ccf25.grey.set_material("transparent-lit")
     urchin.ccf25.grey.set_alpha(0.15)
     urchin.ccf25.grey.set_visibility(True)
-    return get_lf, get_session_ids_from_github, np, pathlib, pl, urchin
-
+    return get_lf, get_session_ids_from_github, pathlib, pl, urchin
 
 
 @app.cell
-def _(get_lf, pl, get_session_ids_from_github):
-    probes = (
+def _(get_lf, get_session_ids_from_github, pl):
+    electrodes_df = (
         get_lf("electrodes")
-        .filter(pl.col("session_id").is_in(get_session_ids_from_github("brainwide")))
-        .collect()
+        .filter(
+            pl.col("session_id").is_in(get_session_ids_from_github("brainwide")),
+            ~pl.col('structure').is_in(['out of brain', 'undefined', 'root']),
+        )
+        .join(
+            get_lf("units").filter(pl.col("decoder_label").ne("noise")), 
+            left_on=["session_id", "group_name", "channel"],
+            right_on=["session_id", "electrode_group_name", "peak_channel"], 
+            how="semi",
+        )
         .drop_nulls(["x", "y", "z"])
+        .collect()
+        # label the min and max channels as tip/base:
         .with_columns(
             pl.when(
                 pl.col("channel").eq(pl.col("channel").min().over("session_id", "group_name"))
@@ -75,65 +88,127 @@ def _(get_lf, pl, get_session_ids_from_github):
             .then(pl.lit("tip"))
             .when(pl.col("channel").eq(pl.col("channel").max().over("session_id", "group_name")))
             .then(pl.lit("base"))
-            .alias("point")
+            .alias("loc")
         )
-        .drop_nulls("point")
-        .select("point", "x", "y", "z", "session_id", "group_name")
+        # keep only tip/base
+        .drop_nulls("loc")
+        # find distance between tip/base in each dimension, for each probe
+        .sort('loc')
+        .group_by('session_id', 'group_name', maintain_order=True)
+        .agg(
+            pl.col('loc', 'x', 'y', 'z'),
+            dx=pl.col('x').get(1) - pl.col('x').get(0),
+            dy=pl.col('y').get(1) - pl.col('y').get(0),
+            dz=pl.col('z').get(1) - pl.col('z').get(0),
+        )
+        .with_columns(
+            # phi is azimuth, cw rotation from AP axis (looking top down on AP/ML plane) 0 deg is
+            # pointing posterior
+            phi=pl.arctan2(-pl.col('dz'), 'dx').degrees()
+        )
+        .with_columns(
+            # theta is clockwise elevation from horizontal in the azimuthal plane (0 deg is horizontal,
+            # +90 straight up)
+            theta=pl.arctan2(-pl.col('dy'), (pl.col('dx') ** 2 + pl.col('dz') ** 2) ** 0.5).degrees()
+        )
+        # .select("loc", "x", "y", "z", "session_id", "group_name")
+        .explode(['loc', 'x', 'y', 'z'])
+        .sort('session_id', 'group_name', 'loc')
+        .rename({'x': 'ap', 'y': 'dv', 'z': 'ml'})
     )
-    return (probes,)
+    electrodes_df
+    return (electrodes_df,)
 
 
 @app.cell
-def draw_probe_lines(np, pl, probes, urchin):
-    # Render CCF probe trajectories with Urchin's thin probe-line primitive.
-    # Electrode CCF columns are (x=AP, y=DV, z=ML); Urchin expects (AP, ML, DV).
-    for _existing_probe in list(urchin.probes.probes):
-        _existing_probe.delete()
-    urchin.probes.probes.clear()
-
-    _probe_geometry = []
-    for _probe in probes.partition_by("session_id", "group_name", maintain_order=True):
-        _base_row = _probe.filter(pl.col("point") == "base").row(0, named=True)
-        _tip_row = _probe.filter(pl.col("point") == "tip").row(0, named=True)
-
-        _base_ccf = np.array([_base_row["x"], _base_row["z"], _base_row["y"]])
-        _tip_ccf = np.array([_tip_row["x"], _tip_row["z"], _tip_row["y"]])
-        _shaft = _base_ccf - _tip_ccf
-        _horizontal = np.hypot(_shaft[0], _shaft[1])
-
-        _probe_geometry.append(
-            (
-                _tip_ccf.tolist(),
-                [
-                    np.degrees(np.arctan2(_shaft[1], _shaft[0])),
-                    np.degrees(np.arctan2(-_shaft[2], _horizontal)),
-                    0.0,
-                ],
-                [0.01, np.linalg.norm(_shaft) / 1000, 0.01],
-            )
-        )
-
-    probe_lines = urchin.probes.create(len(_probe_geometry))
-    urchin.probes.set_positions(probe_lines, [_item[0] for _item in _probe_geometry])
-    urchin.probes.set_angles(probe_lines, [_item[1] for _item in _probe_geometry])
-    urchin.probes.set_scales(probe_lines, [_item[2] for _item in _probe_geometry])
-    urchin.probes.set_colors(probe_lines, ["#000000"] * len(probe_lines))
-
-
-@app.cell
-def _():
+def _(electrodes_df, pl):
+    _df = (
+        electrodes_df
+        .with_columns(pl.col('session_id').str.split('_').list.get(0).alias('subject_id'))
+    )
+    print(f"n subjects: {_df['subject_id'].n_unique()}")
+    print(f"n sessions: {_df['session_id'].n_unique()}")
+    print(f"n insertions: {_df.unique(['session_id', 'group_name']).height}")
     return
 
 
 @app.cell
-async def save_snapshot(pathlib, urchin):
-    # Save the current Urchin view as a PNG snapshot.
-    snapshot_path = pathlib.Path(__file__).resolve().parent / "probe_tracks_snapshot.png"
+def _(electrodes_df, urchin):
+    particles = urchin.particles.ParticleSystem(n=len(electrodes_df))
+    return (particles,)
+
+
+@app.cell
+def _(electrodes_df, particles, pl):
+    # configure appearance of points here:
+    points_df = (
+        electrodes_df
+        .with_columns(
+            (
+                # size:
+                pl.when(pl.col('loc') == 'surface').then(pl.lit(0))
+                .otherwise(pl.lit(0))
+                .alias('size')
+            ),
+            (
+                # color:
+                pl.when(pl.col('loc') == 'tip').then(pl.lit('#ff0000'))
+                .otherwise(pl.lit("#00ffff"))
+                .alias('color')
+            ),
+        )
+    )
+    particles.set_positions(points_df.select(['ap', 'ml', 'dv']).to_numpy().tolist())
+    particles.set_colors(points_df['color'].to_list())
+    particles.set_sizes(points_df['size'].to_list())
+    points_df
+    return
+
+
+@app.cell
+def _(electrodes_df, pl, urchin):
+    probes: list[urchin.probes.Probe] = urchin.probes.create(len(electrodes_df.filter(pl.col('loc') == 'tip')))
+    return (probes,)
+
+
+@app.cell
+def _(electrodes_df, pl, probes: "list[urchin.probes.Probe]", urchin):
+    tip_df = electrodes_df.filter(pl.col('loc') == 'tip')
+    urchin.probes.set_colors(probes, ["#424242"] * len(tip_df))
+    # urchin.probes.set_colors(probes, ["#A0A0A0"] * len(tip_df))
+    urchin.probes.set_positions(probes, tip_df['ap', 'ml', 'dv'].to_numpy().tolist()) #setting the positions within the renderer
+    urchin.probes.set_scales(probes, [(0.01, -3.840, 0.01)] * len(tip_df))
+    urchin.probes.set_angles(
+        probes, 
+        (
+            tip_df
+            .with_columns(
+                pl.lit(0).alias('roll'),
+            )   
+            .select(['phi', 'theta', 'roll'])
+            .to_numpy().tolist()
+        )
+    )
+    return
+
+
+@app.cell
+async def _(pathlib, urchin):
+    # more dorsal:
+    urchin.camera.main.set_rotation([20,39, 225])
+    urchin.camera.main.set_zoom(40)
+    # more medial:
+    urchin.camera.main.set_rotation([30, 55, 225])
+    urchin.camera.main.set_zoom(45)
+
+    urchin.camera.main.set_mode('perspective')
+    snapshot_path = pathlib.Path(__file__).resolve().parent / "urchin.png"
     await urchin.camera.main.screenshot(
-        size=[1600, 1200],
+        size=[2200, 1800],
         filename=str(snapshot_path),
     )
-    snapshot_path
+    await urchin.camera.main.screenshot()
+    return
 
 
 if __name__ == "__main__":
