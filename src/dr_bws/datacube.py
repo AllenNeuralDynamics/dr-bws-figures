@@ -74,9 +74,13 @@ class DatacubeConfig(pydantic_settings.BaseSettings):
             
 datacube_config = DatacubeConfig()
 
-def get_lf(name: str) -> pl.LazyFrame:
-    storage_options = {} if not datacube_config.use_cache else {"skip_signature": "true", "region": "us-west-2"}
-    return pl.scan_parquet((datacube_config.parquet_dir / f"{name}.parquet").as_posix(), storage_options=storage_options)
+def get_lf(name: str, use_cache: bool | None = None) -> pl.LazyFrame:
+    if use_cache is not None:
+        config = datacube_config.model_copy(update={"use_cache": use_cache})
+    else:
+        config = datacube_config
+    storage_options = {} if not config.use_cache else {"skip_signature": "true", "region": "us-west-2"}
+    return pl.scan_parquet((config.parquet_dir / f"{name}.parquet").as_posix(), storage_options=storage_options)
 
 @functools.cache
 def list_nwb_sources() -> tuple[str, ...]:
