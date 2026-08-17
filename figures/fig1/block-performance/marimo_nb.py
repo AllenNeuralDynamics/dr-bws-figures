@@ -5,7 +5,6 @@
 #     "matplotlib",
 #     "marimo",
 #     "polars==1.43.2",
-#     "rinoh-typeface-arial",
 # ]
 # requires-python = "<3.12"
 #
