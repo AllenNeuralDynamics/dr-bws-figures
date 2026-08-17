@@ -24,9 +24,13 @@ def _():
 
     import polars as pl
     
-    from dr_bws.datacube import get_lf, get_session_ids_from_github
+    from dr_bws.datacube import get_lf, get_session_ids_from_github, on_codeocean
 
-    asset_dir = (p := pathlib.Path(__file__)).parent
+    asset_dir = (
+        pathlib.Path(__file__).resolve().parent
+        if not on_codeocean()
+        else pathlib.Path("/root/capsule/results")
+    )
     return asset_dir, get_lf, get_session_ids_from_github, pl
 
 

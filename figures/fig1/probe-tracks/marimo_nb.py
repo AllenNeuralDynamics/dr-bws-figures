@@ -28,7 +28,7 @@ def _():
     import oursin as urchin
     import polars as pl
 
-    from dr_bws.datacube import datacube_config, get_lf, get_session_ids_from_github
+    from dr_bws.datacube import datacube_config, get_lf, get_session_ids_from_github, on_codeocean
 
     datacube_config.use_cache = True
 
@@ -61,7 +61,14 @@ def _():
     urchin.ccf25.grey.set_material("transparent-lit")
     urchin.ccf25.grey.set_alpha(0.15)
     urchin.ccf25.grey.set_visibility(True)
-    return get_lf, get_session_ids_from_github, pathlib, pl, urchin
+    return (
+        get_lf,
+        get_session_ids_from_github,
+        on_codeocean,
+        pathlib,
+        pl,
+        urchin,
+    )
 
 
 @app.cell
@@ -193,7 +200,7 @@ def _(electrodes_df, pl, probes: "list[urchin.probes.Probe]", urchin):
 
 
 @app.cell
-async def _(pathlib, urchin):
+async def _(on_codeocean, pathlib, urchin):
     # more dorsal:
     urchin.camera.main.set_rotation([20,39, 225])
     urchin.camera.main.set_zoom(40)
@@ -202,7 +209,8 @@ async def _(pathlib, urchin):
     urchin.camera.main.set_zoom(45)
 
     urchin.camera.main.set_mode('perspective')
-    snapshot_path = pathlib.Path(__file__).resolve().parent / "urchin.png"
+    parent_dir = pathlib.Path(__file__).resolve().parent if not on_codeocean() else pathlib.Path("/root/capsule/results")
+    snapshot_path = parent_dir / "urchin.png"
     await urchin.camera.main.screenshot(
         size=[2200, 1800],
         filename=str(snapshot_path),
