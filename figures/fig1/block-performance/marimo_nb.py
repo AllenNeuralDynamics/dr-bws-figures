@@ -24,7 +24,9 @@ def _():
 
     import polars as pl
 
-    from dr_bws.datacube import get_lf, get_session_ids_from_github, on_codeocean
+    from dr_bws.datacube import datacube_config, get_lf, get_session_ids_from_github, on_codeocean
+
+    datacube_config.use_cache = True
 
     asset_dir = (
         pathlib.Path(__file__).resolve().parent
@@ -34,7 +36,7 @@ def _():
     return asset_dir, get_lf, get_session_ids_from_github, pl
 
 
-@app.cell   
+@app.cell
 def _(get_lf, get_session_ids_from_github, pl):
     sessions = (
         get_lf("session")
@@ -114,6 +116,7 @@ def _(target_response_rate_agg):
             tooltip=["response_rate_mean", "rewarded_modality", "n_subjects"],
         ).properties(width=200)
     )
+    return
 
 
 @app.cell
@@ -135,6 +138,7 @@ def _(pl, target_response_rate_agg):
         )
         .properties(width=200)
     )
+    return
 
 
 @app.cell
@@ -244,6 +248,7 @@ def _(
     if len(targets) == 2:
         _ax.legend(frameon=False)
     _fig
+    return
 
 
 @app.cell

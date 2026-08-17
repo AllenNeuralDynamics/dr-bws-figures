@@ -6,7 +6,7 @@
 #     "marimo",
 #     "polars==1.43.2",
 # ]
-# requires-python = "<=3.11"
+# requires-python = "<3.12"
 #
 # [tool.uv.sources]
 # dr-bws = { git = "https://github.com/AllenNeuralDynamics/dr-bws-figures" }
@@ -20,11 +20,14 @@ app = marimo.App(width="full", auto_download=["html"])
 
 @app.cell
 def _():
+    import os
     import pathlib
 
     import polars as pl
-    
-    from dr_bws.datacube import get_lf, get_session_ids_from_github, on_codeocean
+
+    from dr_bws.datacube import datacube_config, get_lf, get_session_ids_from_github, on_codeocean
+
+    datacube_config.use_cache = True
 
     asset_dir = (
         pathlib.Path(__file__).resolve().parent
@@ -34,7 +37,7 @@ def _():
     return asset_dir, get_lf, get_session_ids_from_github, pl
 
 
-@app.cell   
+@app.cell
 def _(get_lf, get_session_ids_from_github, pl):
     sessions = (
         get_lf("session")
@@ -547,6 +550,8 @@ def _(pl):
 def _(asset_dir, plot, trials):
     fig = plot(trials, late_autorewards=None)  # both targets
     fig.savefig(asset_dir / "block-switch.svg")
+    return
+
 
 @app.cell
 def _():

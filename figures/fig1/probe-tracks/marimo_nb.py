@@ -21,6 +21,7 @@ app = marimo.App(width="full")
 @app.cell
 def _():
     import contextlib
+    import os
     import pathlib
     import time
 
@@ -32,6 +33,24 @@ def _():
 
     datacube_config.use_cache = True
 
+    asset_dir = (
+        pathlib.Path(__file__).resolve().parent
+        if not on_codeocean()
+        else pathlib.Path("/root/capsule/results")
+    )
+    return (
+        asset_dir,
+        contextlib,
+        get_lf,
+        get_session_ids_from_github,
+        pl,
+        time,
+        urchin,
+    )
+
+
+@app.cell
+def _(contextlib, pl, time, urchin):
     urchin.setup()
     urchin.ccf25.load()
 
@@ -42,18 +61,7 @@ def _():
             for p in globals().get("probes", ()):
                 p.delete()
             urchin.probes.clear()
-
-    ccf_df = (
-        pl.read_csv(
-            "https://raw.githubusercontent.com/cortex-lab/allenCCF/refs/heads/master/structure_tree_safe_2017.csv"
-        )
-        .with_columns(
-            color_hex_triplet=pl.concat_str(
-                pl.lit("#"), pl.col("color_hex_triplet").str.to_lowercase()
-            )
-        )
-    )
-
+            
     # must wait for session to open in browser before continuing
     time.sleep(6)
 
@@ -61,14 +69,7 @@ def _():
     urchin.ccf25.grey.set_material("transparent-lit")
     urchin.ccf25.grey.set_alpha(0.15)
     urchin.ccf25.grey.set_visibility(True)
-    return (
-        get_lf,
-        get_session_ids_from_github,
-        on_codeocean,
-        pathlib,
-        pl,
-        urchin,
-    )
+    return
 
 
 @app.cell
@@ -200,7 +201,7 @@ def _(electrodes_df, pl, probes: "list[urchin.probes.Probe]", urchin):
 
 
 @app.cell
-async def _(on_codeocean, pathlib, urchin):
+async def _(asset_dir, urchin):
     # more dorsal:
     urchin.camera.main.set_rotation([20,39, 225])
     urchin.camera.main.set_zoom(40)
@@ -209,8 +210,7 @@ async def _(on_codeocean, pathlib, urchin):
     urchin.camera.main.set_zoom(45)
 
     urchin.camera.main.set_mode('perspective')
-    parent_dir = pathlib.Path(__file__).resolve().parent if not on_codeocean() else pathlib.Path("/root/capsule/results")
-    snapshot_path = parent_dir / "urchin.png"
+    snapshot_path = asset_dir / "urchin.png"
     await urchin.camera.main.screenshot(
         size=[2200, 1800],
         filename=str(snapshot_path),
