@@ -27,7 +27,8 @@ def _(points):
     import numpy as np
     import oursin as urchin
     import polars as pl
-    from dr_bws.sessions import get_lf, get_sessions
+
+    from dr_bws.datacube import get_lf, get_sessions
 
     urchin.setup()
     urchin.ccf25.load()
@@ -122,7 +123,6 @@ def draw_probe_lines(np, pl, probes, urchin):
     urchin.probes.set_angles(probe_lines, [_item[1] for _item in _probe_geometry])
     urchin.probes.set_scales(probe_lines, [_item[2] for _item in _probe_geometry])
     urchin.probes.set_colors(probe_lines, ["#000000"] * len(probe_lines))
-    return
 
 
 @app.cell
@@ -139,7 +139,6 @@ async def save_snapshot(pathlib, urchin):
         filename=str(snapshot_path),
     )
     snapshot_path
-    return
 
 
 if __name__ == "__main__":

@@ -22,8 +22,9 @@ app = marimo.App(width="full", auto_download=["html"])
 def _():
     import pathlib
 
-    from dr_bws.sessions import get_lf, get_sessions
     import polars as pl
+
+    from dr_bws.datacube import get_lf, get_sessions
 
     asset_dir = (p := pathlib.Path(__file__)).parent
     return get_lf, get_sessions, pl
@@ -48,7 +49,7 @@ def _(get_lf, get_sessions, pl):
 
 @app.cell
 def _(pl):
-    from typing import Iterable
+    from collections.abc import Iterable
 
     import matplotlib.pyplot as plt
     import numpy as np
@@ -536,7 +537,6 @@ def _(pl):
 @app.cell
 def _(plot, trials):
     plot(trials, late_autorewards=None)  # both targets
-    return
 
 
 @app.cell

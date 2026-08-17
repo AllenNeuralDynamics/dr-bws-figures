@@ -22,8 +22,9 @@ app = marimo.App(width="full", auto_download=["html"])
 def _():
     import pathlib
 
-    from dr_bws.sessions import get_lf, get_sessions
     import polars as pl
+
+    from dr_bws.datacube import get_lf, get_sessions
 
     asset_dir = (p := pathlib.Path(__file__)).parent
     return asset_dir, get_lf, get_sessions, pl
@@ -105,7 +106,6 @@ def _(target_response_rate_agg):
             tooltip=["response_rate_mean", "rewarded_modality", "n_subjects"],
         ).properties(width=200)
     )
-    return
 
 
 @app.cell
@@ -127,7 +127,6 @@ def _(pl, target_response_rate_agg):
         )
         .properties(width=200)
     )
-    return
 
 
 @app.cell
@@ -237,7 +236,6 @@ def _(
     if len(targets) == 2:
         _ax.legend(frameon=False)
     _fig
-    return
 
 
 @app.cell

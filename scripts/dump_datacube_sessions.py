@@ -14,14 +14,14 @@ from pathlib import Path
 
 import polars as pl
 
-from dr_bws import sessions
+from dr_bws import datacube
 
 
 def session_table() -> pl.DataFrame:
     dfs = []
-    for session_type in sessions.filter_functions():
-        good = sessions.get_sessions(session_type).with_columns(pl.lit(True).alias("is_behavior_pass"))
-        all = sessions.get_sessions(session_type, with_behavior_filter=False)
+    for session_type in datacube.filter_functions():
+        good = datacube.get_sessions(session_type).with_columns(pl.lit(True).alias("is_behavior_pass"))
+        all = datacube.get_sessions(session_type, with_behavior_filter=False)
         dfs.extend([df.with_columns(session_type=pl.lit(session_type)) for df in (good, all)])
     df= (
         pl.concat(dfs, how='diagonal')

@@ -1,6 +1,6 @@
 """Compare session-table filter presets with the checked-in session ID lists.
 
-The NWB session table used by :mod:`dr_bws.sessions` stores filter metadata in
+The NWB session table used by :mod:`dr_bws.datacube` stores filter metadata in
 ``keywords``.  The consolidated parquet session table stores the same metadata
 as named columns, so the predicates below are the parquet equivalents of the
 standard presets.
@@ -22,7 +22,6 @@ from pathlib import Path
 
 import polars as pl
 
-
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_SESSION_TABLE = ROOT / "assets" / "session_table.parquet"
 DEFAULT_EXPECTED = ROOT / "assets" / "session_ids.json"
@@ -34,7 +33,7 @@ def session_table_presets() -> dict[str, pl.Expr]:
     ``is_annotated`` is the consolidated-table counterpart of the CCF
     annotation keyword.  The project column distinguishes the brainwide and
     Templeton collections; the remaining columns directly correspond to the
-    keyword predicates in ``dr_bws.sessions``.
+    keyword predicates in ``dr_bws.datacube``.
     """
 
     common = (
