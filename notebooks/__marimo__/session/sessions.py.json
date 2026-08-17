@@ -1,0 +1,142 @@
+{
+  "version": "1",
+  "metadata": {
+    "marimo_version": "0.23.16",
+    "script_metadata_hash": "1a6d9d28f584591baad907b323fcc26d"
+  },
+  "cells": [
+    {
+      "id": "Hbol",
+      "code_hash": "8502cdd1f0342b20cbdd6f3836f89b81",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "MJUe",
+      "code_hash": "ba90a71851742b2bf62d05f8968d043d",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "vblA",
+      "code_hash": "eed0a344bfd6c3cc71031cb3bbcb9608",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "bkHC",
+      "code_hash": "6f69021887ffe3dce10d9749d522960c",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/plain": ""
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "lEQa",
+      "code_hash": "50551243d321049977d7070893e5dcfa",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-ui-element object-id='lEQa-0' random-id='5c86980a-5020-3ecf-f66a-84013685eabb'><marimo-table data-initial-value='[]' data-label='null' data-data='&quot;[{&#92;&quot;session_type&#92;&quot;:&#92;&quot;brainwide&#92;&quot;,&#92;&quot;len&#92;&quot;:199},{&#92;&quot;session_type&#92;&quot;:null,&#92;&quot;len&#92;&quot;:42},{&#92;&quot;session_type&#92;&quot;:&#92;&quot;templeton&#92;&quot;,&#92;&quot;len&#92;&quot;:16},{&#92;&quot;session_type&#92;&quot;:&#92;&quot;naive&#92;&quot;,&#92;&quot;len&#92;&quot;:70}]&quot;' data-total-rows='4' data-total-columns='2' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='false' data-page-size='10' data-field-types='[[&quot;session_type&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;len&quot;,[&quot;integer&quot;,&quot;u32&quot;]]]' data-show-filters='true' data-show-download='true' data-show-search='true' data-show-column-summaries='false' data-show-data-types='true' data-show-page-size-selector='false' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-hidden-columns='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "PKri",
+      "code_hash": "531b69de56c28433bb243888f2057274",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "Xref",
+      "code_hash": "1d800605493fc19353ea9e1264762a67",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "SFPL",
+      "code_hash": "7f97b84d405865df2a13c4514fefeb06",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-ui-element object-id='SFPL-0' random-id='6a455b0b-60bd-54e5-f5a1-0aab326f3e9d'><marimo-table data-initial-value='[]' data-label='null' data-data='&quot;[{&#92;&quot;session_id&#92;&quot;:&#92;&quot;668759_2023-07-11&#92;&quot;,&#92;&quot;subject_id&#92;&quot;:668759,&#92;&quot;session_type&#92;&quot;:&#92;&quot;templeton&#92;&quot;,&#92;&quot;is_prod&#92;&quot;:true,&#92;&quot;is_ephys&#92;&quot;:true,&#92;&quot;in_cache_v288&#92;&quot;:false,&#92;&quot;in_cache_v289&#92;&quot;:true,&#92;&quot;in_datacube_v288&#92;&quot;:false,&#92;&quot;in_datacube_v289&#92;&quot;:true,&#92;&quot;in_npc_lims&#92;&quot;:true,&#92;&quot;in_spreadsheet&#92;&quot;:true},{&#92;&quot;session_id&#92;&quot;:&#92;&quot;668759_2023-07-12&#92;&quot;,&#92;&quot;subject_id&#92;&quot;:668759,&#92;&quot;session_type&#92;&quot;:&#92;&quot;templeton&#92;&quot;,&#92;&quot;is_prod&#92;&quot;:true,&#92;&quot;is_ephys&#92;&quot;:true,&#92;&quot;in_cache_v288&#92;&quot;:false,&#92;&quot;in_cache_v289&#92;&quot;:true,&#92;&quot;in_datacube_v288&#92;&quot;:false,&#92;&quot;in_datacube_v289&#92;&quot;:true,&#92;&quot;in_npc_lims&#92;&quot;:true,&#92;&quot;in_spreadsheet&#92;&quot;:true},{&#92;&quot;session_id&#92;&quot;:&#92;&quot;668759_2023-07-13&#92;&quot;,&#92;&quot;subject_id&#92;&quot;:668759,&#92;&quot;session_type&#92;&quot;:&#92;&quot;templeton&#92;&quot;,&#92;&quot;is_prod&#92;&quot;:true,&#92;&quot;is_ephys&#92;&quot;:true,&#92;&quot;in_cache_v288&#92;&quot;:false,&#92;&quot;in_cache_v289&#92;&quot;:true,&#92;&quot;in_datacube_v288&#92;&quot;:false,&#92;&quot;in_datacube_v289&#92;&quot;:true,&#92;&quot;in_npc_lims&#92;&quot;:true,&#92;&quot;in_spreadsheet&#92;&quot;:true},{&#92;&quot;session_id&#92;&quot;:&#92;&quot;670181_2023-07-18&#92;&quot;,&#92;&quot;subject_id&#92;&quot;:670181,&#92;&quot;session_type&#92;&quot;:&#92;&quot;templeton&#92;&quot;,&#92;&quot;is_prod&#92;&quot;:true,&#92;&quot;is_ephys&#92;&quot;:true,&#92;&quot;in_cache_v288&#92;&quot;:false,&#92;&quot;in_cache_v289&#92;&quot;:false,&#92;&quot;in_datacube_v288&#92;&quot;:false,&#92;&quot;in_datacube_v289&#92;&quot;:false,&#92;&quot;in_npc_lims&#92;&quot;:true,&#92;&quot;in_spreadsheet&#92;&quot;:true},{&#92;&quot;session_id&#92;&quot;:&#92;&quot;670181_2023-07-19&#92;&quot;,&#92;&quot;subject_id&#92;&quot;:null,&#92;&quot;session_type&#92;&quot;:null,&#92;&quot;is_prod&#92;&quot;:null,&#92;&quot;is_ephys&#92;&quot;:null,&#92;&quot;in_cache_v288&#92;&quot;:false,&#92;&quot;in_cache_v289&#92;&quot;:false,&#92;&quot;in_datacube_v288&#92;&quot;:false,&#92;&quot;in_datacube_v289&#92;&quot;:false,&#92;&quot;in_npc_lims&#92;&quot;:false,&#92;&quot;in_spreadsheet&#92;&quot;:true},{&#92;&quot;session_id&#92;&quot;:&#92;&quot;670181_2023-07-20&#92;&quot;,&#92;&quot;subject_id&#92;&quot;:670181,&#92;&quot;session_type&#92;&quot;:&#92;&quot;templeton&#92;&quot;,&#92;&quot;is_prod&#92;&quot;:true,&#92;&quot;is_ephys&#92;&quot;:true,&#92;&quot;in_cache_v288&#92;&quot;:false,&#92;&quot;in_cache_v289&#92;&quot;:true,&#92;&quot;in_datacube_v288&#92;&quot;:false,&#92;&quot;in_datacube_v289&#92;&quot;:true,&#92;&quot;in_npc_lims&#92;&quot;:true,&#92;&quot;in_spreadsheet&#92;&quot;:true},{&#92;&quot;session_id&#92;&quot;:&#92;&quot;670180_2023-07-25&#92;&quot;,&#92;&quot;subject_id&#92;&quot;:670180,&#92;&quot;session_type&#92;&quot;:&#92;&quot;templeton&#92;&quot;,&#92;&quot;is_prod&#92;&quot;:true,&#92;&quot;is_ephys&#92;&quot;:true,&#92;&quot;in_cache_v288&#92;&quot;:false,&#92;&quot;in_cache_v289&#92;&quot;:false,&#92;&quot;in_datacube_v288&#92;&quot;:false,&#92;&quot;in_datacube_v289&#92;&quot;:false,&#92;&quot;in_npc_lims&#92;&quot;:true,&#92;&quot;in_spreadsheet&#92;&quot;:true},{&#92;&quot;session_id&#92;&quot;:&#92;&quot;670180_2023-07-26&#92;&quot;,&#92;&quot;subject_id&#92;&quot;:670180,&#92;&quot;session_type&#92;&quot;:&#92;&quot;templeton&#92;&quot;,&#92;&quot;is_prod&#92;&quot;:true,&#92;&quot;is_ephys&#92;&quot;:true,&#92;&quot;in_cache_v288&#92;&quot;:false,&#92;&quot;in_cache_v289&#92;&quot;:true,&#92;&quot;in_datacube_v288&#92;&quot;:false,&#92;&quot;in_datacube_v289&#92;&quot;:true,&#92;&quot;in_npc_lims&#92;&quot;:true,&#92;&quot;in_spreadsheet&#92;&quot;:true},{&#92;&quot;session_id&#92;&quot;:&#92;&quot;670180_2023-07-27&#92;&quot;,&#92;&quot;subject_id&#92;&quot;:670180,&#92;&quot;session_type&#92;&quot;:&#92;&quot;templeton&#92;&quot;,&#92;&quot;is_prod&#92;&quot;:true,&#92;&quot;is_ephys&#92;&quot;:true,&#92;&quot;in_cache_v288&#92;&quot;:false,&#92;&quot;in_cache_v289&#92;&quot;:true,&#92;&quot;in_datacube_v288&#92;&quot;:false,&#92;&quot;in_datacube_v289&#92;&quot;:true,&#92;&quot;in_npc_lims&#92;&quot;:true,&#92;&quot;in_spreadsheet&#92;&quot;:true},{&#92;&quot;session_id&#92;&quot;:&#92;&quot;670248_2023-08-01&#92;&quot;,&#92;&quot;subject_id&#92;&quot;:670248,&#92;&quot;session_type&#92;&quot;:&#92;&quot;templeton&#92;&quot;,&#92;&quot;is_prod&#92;&quot;:true,&#92;&quot;is_ephys&#92;&quot;:true,&#92;&quot;in_cache_v288&#92;&quot;:false,&#92;&quot;in_cache_v289&#92;&quot;:true,&#92;&quot;in_datacube_v288&#92;&quot;:false,&#92;&quot;in_datacube_v289&#92;&quot;:true,&#92;&quot;in_npc_lims&#92;&quot;:true,&#92;&quot;in_spreadsheet&#92;&quot;:true}]&quot;' data-total-rows='327' data-total-columns='11' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='true' data-page-size='10' data-field-types='[[&quot;session_id&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;subject_id&quot;,[&quot;integer&quot;,&quot;i64&quot;]],[&quot;session_type&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;is_prod&quot;,[&quot;boolean&quot;,&quot;bool&quot;]],[&quot;is_ephys&quot;,[&quot;boolean&quot;,&quot;bool&quot;]],[&quot;in_cache_v288&quot;,[&quot;boolean&quot;,&quot;bool&quot;]],[&quot;in_cache_v289&quot;,[&quot;boolean&quot;,&quot;bool&quot;]],[&quot;in_datacube_v288&quot;,[&quot;boolean&quot;,&quot;bool&quot;]],[&quot;in_datacube_v289&quot;,[&quot;boolean&quot;,&quot;bool&quot;]],[&quot;in_npc_lims&quot;,[&quot;boolean&quot;,&quot;bool&quot;]],[&quot;in_spreadsheet&quot;,[&quot;boolean&quot;,&quot;bool&quot;]]]' data-show-filters='true' data-show-download='true' data-show-search='true' data-show-column-summaries='true' data-show-data-types='true' data-show-page-size-selector='true' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-hidden-columns='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "BYtC",
+      "code_hash": "654e756aa9bacc8d5cd1be6e28fbb4b2",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "RGSE",
+      "code_hash": "44d4982ce751a349d9f175da812ed0fe",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "Kclp",
+      "code_hash": "31e1ad4749788055879ee854cfea4e2d",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "emfo",
+      "code_hash": "7927ff3b03d17563c50f8eb5695a48ac",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "Hstk",
+      "code_hash": "f02e43819e436714f52b4a008b51fd21",
+      "outputs": [
+        {
+          "type": "data",
+          "data": {
+            "text/html": "<marimo-ui-element object-id='Hstk-0' random-id='6d90890b-ff68-6182-8299-48d6a8223f52'><marimo-table data-initial-value='[]' data-label='null' data-data='&quot;[{&#92;&quot;session_id&#92;&quot;:&#92;&quot;620263_2022-07-26&#92;&quot;,&#92;&quot;subject_id&#92;&quot;:620263,&#92;&quot;is_behavior_pass&#92;&quot;:true,&#92;&quot;session_type&#92;&quot;:&#92;&quot;templeton&#92;&quot;},{&#92;&quot;session_id&#92;&quot;:&#92;&quot;620263_2022-07-26&#92;&quot;,&#92;&quot;subject_id&#92;&quot;:620263,&#92;&quot;is_behavior_pass&#92;&quot;:false,&#92;&quot;session_type&#92;&quot;:&#92;&quot;templeton&#92;&quot;},{&#92;&quot;session_id&#92;&quot;:&#92;&quot;620263_2022-07-27&#92;&quot;,&#92;&quot;subject_id&#92;&quot;:620263,&#92;&quot;is_behavior_pass&#92;&quot;:true,&#92;&quot;session_type&#92;&quot;:&#92;&quot;templeton&#92;&quot;},{&#92;&quot;session_id&#92;&quot;:&#92;&quot;620263_2022-07-27&#92;&quot;,&#92;&quot;subject_id&#92;&quot;:620263,&#92;&quot;is_behavior_pass&#92;&quot;:false,&#92;&quot;session_type&#92;&quot;:&#92;&quot;templeton&#92;&quot;},{&#92;&quot;session_id&#92;&quot;:&#92;&quot;620264_2022-08-02&#92;&quot;,&#92;&quot;subject_id&#92;&quot;:620264,&#92;&quot;is_behavior_pass&#92;&quot;:true,&#92;&quot;session_type&#92;&quot;:&#92;&quot;templeton&#92;&quot;},{&#92;&quot;session_id&#92;&quot;:&#92;&quot;620264_2022-08-02&#92;&quot;,&#92;&quot;subject_id&#92;&quot;:620264,&#92;&quot;is_behavior_pass&#92;&quot;:false,&#92;&quot;session_type&#92;&quot;:&#92;&quot;templeton&#92;&quot;},{&#92;&quot;session_id&#92;&quot;:&#92;&quot;626791_2022-08-15&#92;&quot;,&#92;&quot;subject_id&#92;&quot;:626791,&#92;&quot;is_behavior_pass&#92;&quot;:true,&#92;&quot;session_type&#92;&quot;:&#92;&quot;brainwide&#92;&quot;},{&#92;&quot;session_id&#92;&quot;:&#92;&quot;626791_2022-08-15&#92;&quot;,&#92;&quot;subject_id&#92;&quot;:626791,&#92;&quot;is_behavior_pass&#92;&quot;:false,&#92;&quot;session_type&#92;&quot;:&#92;&quot;brainwide&#92;&quot;},{&#92;&quot;session_id&#92;&quot;:&#92;&quot;626791_2022-08-17&#92;&quot;,&#92;&quot;subject_id&#92;&quot;:626791,&#92;&quot;is_behavior_pass&#92;&quot;:false,&#92;&quot;session_type&#92;&quot;:&#92;&quot;brainwide&#92;&quot;},{&#92;&quot;session_id&#92;&quot;:&#92;&quot;628801_2022-09-19&#92;&quot;,&#92;&quot;subject_id&#92;&quot;:628801,&#92;&quot;is_behavior_pass&#92;&quot;:true,&#92;&quot;session_type&#92;&quot;:&#92;&quot;templeton&#92;&quot;}]&quot;' data-total-rows='282' data-total-columns='4' data-max-columns='50' data-banner-text='&quot;&quot;' data-pagination='true' data-page-size='10' data-field-types='[[&quot;session_id&quot;,[&quot;string&quot;,&quot;str&quot;]],[&quot;subject_id&quot;,[&quot;integer&quot;,&quot;i64&quot;]],[&quot;is_behavior_pass&quot;,[&quot;boolean&quot;,&quot;bool&quot;]],[&quot;session_type&quot;,[&quot;string&quot;,&quot;str&quot;]]]' data-show-filters='true' data-show-download='true' data-show-search='true' data-show-column-summaries='true' data-show-data-types='true' data-show-page-size-selector='true' data-show-column-explorer='true' data-show-chart-builder='true' data-row-headers='[]' data-hidden-columns='[]' data-has-stable-row-id='false' data-lazy='false' data-preload='false'></marimo-table></marimo-ui-element>"
+          }
+        }
+      ],
+      "console": []
+    },
+    {
+      "id": "nWHF",
+      "code_hash": "ae1bb5102e3c5b7b22ada3cf49aedb76",
+      "outputs": [],
+      "console": []
+    }
+  ]
+}

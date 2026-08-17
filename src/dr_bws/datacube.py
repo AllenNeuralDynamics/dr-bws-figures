@@ -131,7 +131,7 @@ def brainwide_ephys_filter(with_behavior_filter: bool = True) -> pl.Expr:
             )
         )["session_id"].to_list()
     else:
-        good_behavior_session_ids = None
+        good_behavior_session_ids = []
     return pl.all_horizontal(
         *[pl.col("keywords").list.contains(keyword) for keyword in required],
         *[~pl.col("keywords").list.contains(keyword) for keyword in excluded],

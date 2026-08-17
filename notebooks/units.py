@@ -10,7 +10,6 @@ def _():
 
     with open(r"C:\Users\ben.hardcastle\github\dr-bws-figures\assets\session_ids.json", "r") as f:
         session_ids = json.load(f)
-    return
 
 
 @app.cell
@@ -39,7 +38,7 @@ def _(v):
 
 @app.cell
 def _(pl, sessions, v):
-    from dr_bws.sessions import brainwide_ephys_filter
+    from dr_bws.datacube import brainwide_ephys_filter
 
     sessions (
         pl.scan_parquet(
@@ -49,7 +48,6 @@ def _(pl, sessions, v):
         .filter(brainwide_ephys_filter())
         .collect()
     )
-    return
 
 
 if __name__ == "__main__":
