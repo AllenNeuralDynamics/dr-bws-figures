@@ -38,7 +38,7 @@ def session_table() -> pl.DataFrame:
 def dump_session_table() -> None:
     output_dir = Path(__file__).resolve().parents[1] / "assets"
     output_dir.mkdir(parents=True, exist_ok=True)
-    session_table().write_csv(output_dir / "sessions.csv")
+    session_table().write_csv(output_dir / "datacube_sessions.csv")
 
 if __name__ == "__main__":
     dump_session_table()

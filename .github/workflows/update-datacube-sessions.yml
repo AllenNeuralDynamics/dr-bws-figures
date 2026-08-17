@@ -44,11 +44,11 @@ jobs:
 
       - name: Commit and push updated session IDs
         run: |
-          if git ls-files --error-unmatch assets/sessions.csv >/dev/null 2>&1 && git diff --quiet -- assets/sessions.csv; then
+          if git ls-files --error-unmatch assets/datacube_sessions.csv >/dev/null 2>&1 && git diff --quiet -- assets/datacube_sessions.csv; then
             exit 0
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add assets/sessions.csv
+          git add assets/datacube_sessions.csv
           git commit -m "Update session IDs [skip ci]"
           git push
