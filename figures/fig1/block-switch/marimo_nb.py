@@ -5,6 +5,7 @@
 #     "matplotlib",
 #     "marimo",
 #     "polars==1.43.2",
+#     "scipy",
 # ]
 # requires-python = "<3.12"
 #
@@ -24,11 +25,18 @@ def _():
     import pathlib
     from collections.abc import Iterable
 
-    import polars as pl
     import matplotlib.pyplot as plt
     import matplotlib.style
     import numpy as np
-    from dr_bws.datacube import datacube_config, get_lf, get_session_ids_from_github, on_codeocean
+    import polars as pl
+    from scipy.stats import wilcoxon
+
+    from dr_bws.datacube import (
+        datacube_config,
+        get_lf,
+        get_session_ids_from_github,
+        on_codeocean,
+    )
 
     matplotlib.style.use("default")
 
@@ -51,6 +59,7 @@ def _():
         pl,
         plt,
         results_dir,
+        wilcoxon,
     )
 
 
@@ -77,7 +86,7 @@ def _(get_lf, get_session_ids_from_github, pl):
 
 
 @app.cell
-def _(Iterable, np, pl, plt):
+def _(Iterable, np, pl, plt, wilcoxon):
     def format_ax(
         ax,
         ax_idx: int | None,
@@ -149,6 +158,7 @@ def _(Iterable, np, pl, plt):
     def plot(trials: pl.DataFrame, late_autorewards: bool | None = None):
         trials_df = trials.clone()
         fig, axes = plt.subplots(1, 2, figsize=(3, 2), sharex=True, sharey=True)
+        transition_stats_rows = []
         for ax_idx, (ax, stimLbl, clr) in enumerate(
             zip(axes, ("rewarded target stim", "unrewarded target stim"), "kk")
         ):
@@ -193,6 +203,34 @@ def _(Iterable, np, pl, plt):
                     y.pop()
                     continue
                 y[-1] = np.nanmean(y[-1], axis=0)
+            y = np.asarray(y, dtype=float)
+            last_before = y[:, preTrials - 1]
+            first_after = y[:, preTrials + 1]
+            valid_pairs = ~(np.isnan(last_before) | np.isnan(first_after))
+            last_before = last_before[valid_pairs]
+            first_after = first_after[valid_pairs]
+            differences = first_after - last_before
+            if np.all(differences == 0):
+                statistic, p_value = 0.0, 1.0
+            else:
+                test_result = wilcoxon(first_after, last_before, alternative="two-sided")
+                statistic, p_value = float(test_result.statistic), float(test_result.pvalue)
+            transition_stats_rows.append(
+                {
+                    "ax": ax_idx,
+                    "transition": "to_rewarded" if is_switch_to_rewarded else "to_unrewarded",
+                    "stimulus": stimLbl,
+                    "test": "two-sided Wilcoxon signed-rank",
+                    "unit": "mouse",
+                    "n": len(differences),
+                    "last_before_mean": float(np.mean(last_before)),
+                    "first_after_mean": float(np.mean(first_after)),
+                    "mean_difference": float(np.mean(differences)),
+                    "median_difference": float(np.median(differences)),
+                    "statistic": statistic,
+                    "p_value": p_value,
+                }
+            )
             m = np.nanmean(y, axis=0)
             ax.plot(x, m, color=clr, label=stimLbl, lw=0.3, zorder=99)
             # add points
@@ -244,7 +282,7 @@ def _(Iterable, np, pl, plt):
             else:
                 autorewards_name = "all-autorewards"
             # utils.savefig(__file__, fig, suffix=autorewards_name)
-        return fig
+        return fig, pl.DataFrame(transition_stats_rows)
 
     def plot_suppl(
         trials: pl.DataFrame, combined: bool = False, late_autorewards: bool | None = None
@@ -556,8 +594,9 @@ def _(Iterable, np, pl, plt):
 
 @app.cell
 def _(plot, results_dir, trials):
-    fig = plot(trials, late_autorewards=None)  # both targets
+    fig, transition_stats = plot(trials, late_autorewards=None)  # both targets
     fig.savefig(results_dir / "block-switch.svg")
+    transition_stats.write_csv(results_dir / "block-switch-stats.csv")
     return
 
 
