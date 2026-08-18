@@ -193,16 +193,16 @@ def _(pl, target_response_rate_agg):
 @app.cell
 def _():
     colors = {"vis": "#0072B2", "aud": "#D55E00"}
-    figure_kwargs = {"figsize": (4.5, 3.2), "constrained_layout": True}
+    figure_kwargs = {"figsize": (3, 2)}
 
     def format_ax(ax, data, targets):
         ax.set(
             xlabel="Block #",
             xticks=sorted(data["block_index"].unique().to_list()),
         )
-        ax.grid(axis="y", alpha=0.25)
-        ax.spines["top"].set_visible(False)
-        ax.spines["right"].set_visible(False)
+        for side in ("right", "top"):
+            ax.spines[side].set_visible(False)
+        ax.tick_params(direction="out", top=False, right=False, labelsize=8)
         if len(targets) == 2:
             ax.legend(frameon=False)
 
@@ -275,10 +275,12 @@ def _(
             _x,
             _mean,
             color=colors[_target],
-            marker="o",
+            marker=".",
+            markersize=2,
             linewidth=2,
             label=f"{_target} target",
             zorder=3,
+            clip_on=False,
         )
 
         if error_bars != "none":
@@ -308,6 +310,7 @@ def _(
         else f"{_targets[0].capitalize()} target response probability",
         ylim=(0, 1.05),
     )
+    _fig.tight_layout()
     _fig.savefig(results_dir / "response-probability.svg")
     _fig
     return
@@ -369,9 +372,11 @@ def _(
         _x,
         _mean,
         color="k",
-        marker="o",
+        marker=".",
+        markersize=2,
         linewidth=2,
         zorder=3,
+        clip_on=False,
     )
 
     if error_bars != "none":
@@ -398,6 +403,7 @@ def _(
         ylim=(-3.5, 3.5),
     )
     _ax.axhline(0, lw=0.5, zorder=0, c="grey")
+    _fig.tight_layout()
     _fig.savefig(results_dir / "cross-modality-dprime.svg")
     _fig
     return
@@ -476,10 +482,12 @@ def _(
             _x,
             _mean,
             color=colors[_modality],
-            marker="o",
+            marker=".",
+            markersize=2,
             linewidth=2,
             label=f"{_modality}",
             zorder=3,
+            clip_on=False,
         )
 
         if error_bars != "none":
@@ -508,6 +516,7 @@ def _(
         ylim=(-0.99, 4),
     )
     _ax.axhline(0, lw=0.5, zorder=0, c="grey")
+    _fig.tight_layout()
     _fig.savefig(results_dir / "intramodal-dprime.svg")
     _fig
     return
