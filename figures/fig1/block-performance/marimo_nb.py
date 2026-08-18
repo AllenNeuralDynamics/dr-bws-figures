@@ -193,7 +193,7 @@ def _(pl, target_response_rate_agg):
 @app.cell
 def _():
     colors = {"vis": "#0072B2", "aud": "#D55E00"}
-    figure_kwargs = {"figsize": (3, 2)}
+    figure_kwargs = {"figsize": (1.5, 2)}
 
     def format_ax(ax, data, targets):
         ax.set(
@@ -203,8 +203,8 @@ def _():
         for side in ("right", "top"):
             ax.spines[side].set_visible(False)
         ax.tick_params(direction="out", top=False, right=False, labelsize=8)
-        if len(targets) == 2:
-            ax.legend(frameon=False)
+        # if len(targets) == 2:
+        #     ax.legend(frameon=False)
 
     return colors, figure_kwargs, format_ax
 
@@ -260,7 +260,7 @@ def _(
                     _trace["response_rate"].to_numpy(),
                     color=colors[_target],
                     # alpha=0.15,
-                    linewidth=0.15,
+                    linewidth=0.1,
                     zorder=1,
                     clip_on=False,
                 )
@@ -277,7 +277,7 @@ def _(
             color=colors[_target],
             marker=".",
             markersize=2,
-            linewidth=2,
+            linewidth=1.0,
             label=f"{_target} target",
             zorder=3,
             clip_on=False,
@@ -374,7 +374,7 @@ def _(
         color="k",
         marker=".",
         markersize=2,
-        linewidth=2,
+        linewidth=1,
         zorder=3,
         clip_on=False,
     )
@@ -467,7 +467,7 @@ def _(
                     _trace["dprime"].to_numpy(),
                     color=colors[_modality],
                     # alpha=0.15,
-                    linewidth=0.15,
+                    linewidth=0.1,
                     zorder=1,
                     clip_on=False,
                 )
@@ -484,7 +484,7 @@ def _(
             color=colors[_modality],
             marker=".",
             markersize=2,
-            linewidth=2,
+            linewidth=1.0,
             label=f"{_modality}",
             zorder=3,
             clip_on=False,
