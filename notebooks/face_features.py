@@ -56,32 +56,30 @@ def _(get_session_ids_from_github, list_nwb_sources, pathlib):
 @app.cell
 def _(pl):
     # polars expressions to derive ids from lazynwb tables
-    session_id = (
-        pl.col("_nwb_path")
-        .str.split("/")
-        .list.get(-1)
-        .str.strip_suffix(".nwb")
-        .alias("session_id")
-    )
+    session_id = pl.col("_nwb_path").str.split("/").list.get(-1).str.strip_suffix(".nwb").alias("session_id")
     subject_id = session_id.str.split("_").list.get(0).alias("subject_id")
     return session_id, subject_id
 
 
 @app.cell
 def _(lazynwb, nwb_sources, pprint, session_id, subject_id):
-    eye_lf = lazynwb.scan_nwb(
-        nwb_sources, table_path="processing/behavior/eye_tracking"
-    ).with_columns(session_id, subject_id)
-
+    eye_lf = (
+        lazynwb.scan_nwb(nwb_sources, table_path="processing/behavior/eye_tracking")
+        .with_columns(session_id, subject_id)
+    )
     pprint.pprint(eye_lf.collect_schema())
     return (eye_lf,)
 
 
 @app.cell
 def _(eye_lf):
-    eye_df = eye_lf.select(
-        "session_id", "subject_id", "pupil_area", "timestamps", "pupil_is_bad_frame"
-    ).collect()
+    eye_df = (
+        eye_lf
+        .select(
+            "session_id", "subject_id", "pupil_area", "timestamps", "pupil_is_bad_frame"
+        )
+        .collect()
+    )
     return (eye_df,)
 
 
@@ -112,11 +110,6 @@ def _(eye_df, pl, plt):
 def _(lazynwb, nwb_sources, pprint):
     face_lf = lazynwb.scan_nwb(nwb_sources, table_path="processing/behavior/lp_front_camera")
     pprint.pprint(face_lf.collect_schema())
-    return
-
-
-@app.cell
-def _():
     return
 
 
