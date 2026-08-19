@@ -25,7 +25,7 @@ jobs:
         with:
           python-version-file: .python-version
 
-      - run: uv sync --locked
+      - run: uv sync --locked --all-extras
 
       - name: Configure aws credentials
         env:

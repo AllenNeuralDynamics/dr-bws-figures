@@ -5,13 +5,14 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
-    "aind-session>=0.3.26",
     "lazynwb==1.0.0.dev3",
-    "marimo>=0.23.16",
     "polars>=1.43.2",
-    "pydantic>=2.10.0",
     "pydantic-settings",
+    "universal-pathlib",
 ]
+
+[project.optional-dependencies]
+co = ["aind-session>=0.3.26"]
 
 [build-system]
 requires = ["uv_build>=0.10.7,<0.11.0"]
