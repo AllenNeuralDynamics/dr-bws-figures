@@ -2,10 +2,9 @@ import contextlib
 import functools
 import logging
 import os
-from typing import Literal
 from collections.abc import Callable
+from typing import Literal
 
-import aind_session
 import polars as pl
 import pydantic
 import pydantic_settings
@@ -55,6 +54,10 @@ class DatacubeConfig(pydantic_settings.BaseSettings):
                 return choice
             return datacube_dir[0]
         # get S3 dir of datacube asset from CO API
+        try:
+            import aind_session
+        except ImportError:
+            raise ImportError("aind_session and a CO_API_TOKEN are required to find the datacube data asset on S3. Install as an optional-dependency with `dr-bws-figures[co]`.")
         return aind_session.get_data_asset_source_dir(
             next(d for d in reversed(aind_session.get_data_assets('dynamicrouting_datacube')) if self.version in d.name).id
         )
@@ -240,7 +243,7 @@ def get_session_ids_from_github(
     if with_behavior_filter:
         filter_expr = filter_expr & pl.col("is_behavior_pass")
     return pl.read_csv(
-        f"https://raw.githubusercontent.com/AllenNeuralDynamics/dr-bws-figures/main/assets/datacube_sessions.csv"
+        "https://raw.githubusercontent.com/AllenNeuralDynamics/dr-bws-figures/main/assets/datacube_sessions.csv"
     ).filter(filter_expr)["session_id"].sort().to_list()
 
 if __name__ == "__main__":
