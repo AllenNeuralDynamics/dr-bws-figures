@@ -3,9 +3,10 @@
 #     "altair==6.2.2",
 #     "dr-bws",
 #     "marimo",
+#     "matplotlib",
 #     "polars==1.43.2",
 # ]
-# requires-python = "<3.12"
+# requires-python = ">=3.11"
 #
 # [tool.uv.sources]
 # dr-bws = { git = "https://github.com/AllenNeuralDynamics/dr-bws-figures" }
