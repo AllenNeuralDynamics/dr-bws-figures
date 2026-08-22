@@ -1,101 +1,63 @@
 {
   "version": "1",
   "metadata": {
-    "marimo_version": "0.23.16",
-    "script_metadata_hash": "1fd018bd61b456b2275169e8acbc7b28"
+    "marimo_version": "0.24.0",
+    "script_metadata_hash": "aa5db355e939a2a25e0975c895142add"
   },
   "cells": [
     {
       "id": "Hbol",
-      "code_hash": "86ffefbef1b6cfb4b080460a23d66427",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
-      "console": [
-        {
-          "type": "stream",
-          "name": "stdout",
-          "text": "(URN) connected to server\nLogin sent with ID: ef4e0b2c, copy this ID into the renderer to connect.\n",
-          "mimetype": "text/plain"
-        }
-      ]
+      "code_hash": "f8b4ac8a5643ea68fa83b721a1f56e82",
+      "outputs": [],
+      "console": []
     },
     {
       "id": "MJUe",
-      "code_hash": "27aa28385a17f70f4097023b793a4cfb",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
+      "code_hash": "469e5093a2d2ea2cbddb3e654ea124fe",
+      "outputs": [],
       "console": []
     },
     {
       "id": "vblA",
-      "code_hash": "fb1795ed227f24e7f1fa844e679c2ba8",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
+      "code_hash": "a15be3f01c070178845d3e2dd3443be8",
+      "outputs": [],
       "console": []
     },
     {
       "id": "bkHC",
-      "code_hash": "ba2c817bd405540842c94b7459cf3ebf",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
+      "code_hash": "de09839d47f2de59c7a7817d4d4d8f7c",
+      "outputs": [],
       "console": []
     },
     {
       "id": "lEQa",
-      "code_hash": null,
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/plain": ""
-          }
-        }
-      ],
+      "code_hash": "0567d693ab80ceab4cfbabb05df11830",
+      "outputs": [],
       "console": []
     },
     {
-      "id": "lemC",
-      "code_hash": "e614487687ccc89c57b4b793c8caea5b",
-      "outputs": [
-        {
-          "type": "data",
-          "data": {
-            "text/html": "<pre class='text-xs'>PosixPath(&#x27;/Users/benh/github/dr-bws-figures/figures/fig1/probe-tracks/probe_tracks_snapshot.png&#x27;)</pre>"
-          }
-        }
-      ],
-      "console": [
-        {
-          "type": "stream",
-          "name": "stdout",
-          "text": "(Camera receive) Camera CameraMain received an image\n(Camera receive) CameraMain complete\n",
-          "mimetype": "text/plain"
-        }
-      ]
+      "id": "PKri",
+      "code_hash": "c06c97917f790b120eb33cbd19708fa7",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "Xref",
+      "code_hash": "e21c4be6b0a79a0fea8277080ad58fa7",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "SFPL",
+      "code_hash": "8314dfa4cbccdad3539711e5625c8b52",
+      "outputs": [],
+      "console": []
+    },
+    {
+      "id": "BYtC",
+      "code_hash": "f09440881223e391d2c4c0544af68ef9",
+      "outputs": [],
+      "console": []
     }
   ]
 }
