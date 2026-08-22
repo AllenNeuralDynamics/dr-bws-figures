@@ -7,7 +7,7 @@
 #     "polars==1.43.2",
 #     "scipy",
 # ]
-# requires-python = "<3.12"
+# requires-python = ">=3.11"
 #
 # [tool.uv.sources]
 # dr-datacube = { git = "https://github.com/AllenNeuralDynamics/dr-datacube" }

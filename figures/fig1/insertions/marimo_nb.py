@@ -1,5 +1,5 @@
 # /// script
-# requires-python = "<3.12"
+# requires-python = ">=3.11"
 # dependencies = [
 #     "marimo>=0.23.16",
 #     "numpy==2.4.6",
@@ -9,7 +9,7 @@
 # ]
 #
 # [tool.uv.sources]
-# dr-bws = { git = "https://github.com/AllenNeuralDynamics/dr-datacube" }
+# dr-datacube = { git = "https://github.com/AllenNeuralDynamics/dr-datacube" }
 # ///
 
 import marimo
@@ -26,7 +26,6 @@ def _():
 
     import oursin as urchin
     import polars as pl
-
     from dr_datacube import datacube_config, get_lf, get_session_ids_from_github, on_codeocean
 
     datacube_config.use_cache = True
@@ -67,7 +66,6 @@ def _(contextlib, time, urchin):
     urchin.ccf25.grey.set_material("transparent-lit")
     urchin.ccf25.grey.set_alpha(0.15)
     urchin.ccf25.grey.set_visibility(True)
-    return
 
 
 @app.cell
@@ -135,7 +133,6 @@ def _(electrodes_df, pl):
     print(f"n subjects: {_df['subject_id'].n_unique()}")
     print(f"n sessions: {_df['session_id'].n_unique()}")
     print(f"n insertions: {_df.unique(['session_id', 'group_name']).height}")
-    return
 
 
 @app.cell
@@ -168,7 +165,6 @@ def _(electrodes_df, particles, pl):
     particles.set_colors(points_df['color'].to_list())
     particles.set_sizes(points_df['size'].to_list())
     points_df
-    return
 
 
 @app.cell
@@ -195,7 +191,6 @@ def _(electrodes_df, pl, probes: "list[urchin.probes.Probe]", urchin):
             .to_numpy().tolist()
         )
     )
-    return
 
 
 @app.cell
@@ -214,7 +209,6 @@ async def _(results_dir, urchin):
         filename=str(snapshot_path),
     )
     await urchin.camera.main.screenshot()
-    return
 
 
 if __name__ == "__main__":

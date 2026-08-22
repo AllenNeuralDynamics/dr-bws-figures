@@ -6,10 +6,10 @@
 #     "marimo",
 #     "polars==1.43.2",
 # ]
-# requires-python = "<3.12"
+# requires-python = ">=3.11"
 #
 # [tool.uv.sources]
-# dr-bws = { git = "https://github.com/AllenNeuralDynamics/dr-datacube" }
+# dr-datacube = { git = "https://github.com/AllenNeuralDynamics/dr-datacube" }
 # ///
 
 import marimo
@@ -22,11 +22,10 @@ app = marimo.App(width="full")
 def _():
     import pathlib
 
-    import polars as pl
-    import matplotlib.style
     import matplotlib.pyplot as plt
+    import matplotlib.style
     import numpy as np
-
+    import polars as pl
     from dr_datacube import (
         datacube_config,
         get_lf,
@@ -151,7 +150,6 @@ def _(target_response_rate_agg):
             tooltip=["response_rate_mean", "rewarded_modality", "n_subjects"],
         ).properties(width=200)
     )
-    return
 
 
 @app.cell
@@ -165,7 +163,6 @@ def _(target_response_rate_agg):
             tooltip=["signed_cross_modality_dprime_mean", "rewarded_modality", "n_subjects"],
         ).properties(width=200)
     )
-    return
 
 
 @app.cell
@@ -187,7 +184,6 @@ def _(pl, target_response_rate_agg):
         )
         .properties(width=200)
     )
-    return
 
 
 @app.cell
@@ -342,7 +338,6 @@ def _(
     _fig.tight_layout()
     _fig.savefig(results_dir / "response-probability.svg")
     _fig
-    return
 
 
 @app.cell
@@ -437,7 +432,6 @@ def _(
     _fig.tight_layout()
     _fig.savefig(results_dir / "cross-modality-dprime.svg")
     _fig
-    return
 
 
 @app.cell
@@ -551,7 +545,6 @@ def _(
     _fig.tight_layout()
     _fig.savefig(results_dir / "intramodal-dprime.svg")
     _fig
-    return
 
 
 @app.cell

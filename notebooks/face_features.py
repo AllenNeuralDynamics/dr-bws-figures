@@ -8,7 +8,7 @@
 # requires-python = "<3.12"
 #
 # [tool.uv.sources]
-# dr-bws = { git = "https://github.com/AllenNeuralDynamics/dr-datacube" }
+# dr-datacube = { git = "https://github.com/AllenNeuralDynamics/dr-datacube" }
 # ///
 
 import marimo
