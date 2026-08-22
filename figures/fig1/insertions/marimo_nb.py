@@ -5,11 +5,11 @@
 #     "numpy==2.4.6",
 #     "oursin==1.0.1",
 #     "polars==1.43.2",
-#     "dr-bws",
+#     "dr-datacube",
 # ]
 #
 # [tool.uv.sources]
-# dr-bws = { git = "https://github.com/AllenNeuralDynamics/dr-bws-figures" }
+# dr-bws = { git = "https://github.com/AllenNeuralDynamics/dr-datacube" }
 # ///
 
 import marimo
@@ -27,7 +27,7 @@ def _():
     import oursin as urchin
     import polars as pl
 
-    from dr_bws.datacube import datacube_config, get_lf, get_session_ids_from_github, on_codeocean
+    from dr_datacube import datacube_config, get_lf, get_session_ids_from_github, on_codeocean
 
     datacube_config.use_cache = True
 

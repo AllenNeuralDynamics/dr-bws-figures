@@ -4,12 +4,12 @@
 #     "marimo>=0.23.16",
 #     "npc-lims==0.1.198",
 #     "polars==1.43.2",
-#     "dr-bws",
+#     "dr-datacube",
 #     "altair==6.2.2",
 # ]
 #
 # [tool.uv.sources]
-# dr-bws = { git = "https://github.com/AllenNeuralDynamics/dr-bws-figures" }
+# dr-bws = { git = "https://github.com/AllenNeuralDynamics/dr-datacube" }
 # ///
 
 import marimo
@@ -22,12 +22,11 @@ app = marimo.App(width="medium")
 def _():
 
     import altair as alt
+    import dr_datacube as s
     import lazynwb
     import marimo as mo
     import npc_lims
     import polars as pl
-
-    import dr_bws.datacube as s
 
     lazynwb.config.anon = True
     return alt, lazynwb, mo, npc_lims, pl, s

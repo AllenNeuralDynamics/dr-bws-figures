@@ -1,7 +1,7 @@
 # /// script
 # dependencies = [
 #     "altair==6.2.2",
-#     "dr-bws",
+#     "dr-datacube",
 #     "matplotlib",
 #     "marimo",
 #     "polars==1.43.2",
@@ -9,7 +9,7 @@
 # requires-python = "<3.12"
 #
 # [tool.uv.sources]
-# dr-bws = { git = "https://github.com/AllenNeuralDynamics/dr-bws-figures" }
+# dr-bws = { git = "https://github.com/AllenNeuralDynamics/dr-datacube" }
 # ///
 
 import marimo
@@ -27,7 +27,7 @@ def _():
     import matplotlib.pyplot as plt
     import numpy as np
 
-    from dr_bws.datacube import (
+    from dr_datacube import (
         datacube_config,
         get_lf,
         get_session_ids_from_github,

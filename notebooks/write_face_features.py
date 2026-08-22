@@ -1,7 +1,7 @@
 # /// script
 # dependencies = [
 #     "altair==6.2.2",
-#     "dr-bws",
+#     "dr-datacube",
 #     "marimo",
 #     "matplotlib",
 #     "polars==1.43.2",
@@ -9,7 +9,7 @@
 # requires-python = ">=3.11"
 #
 # [tool.uv.sources]
-# dr-bws = { git = "https://github.com/AllenNeuralDynamics/dr-bws-figures" }
+# dr-bws = { git = "https://github.com/AllenNeuralDynamics/dr-datacube" }
 # ///
 
 import marimo
@@ -21,16 +21,14 @@ app = marimo.App(width="full")
 @app.cell
 def _():
     import pathlib
-    import pprint
 
     import lazynwb
     import polars as pl
-    import matplotlib.pyplot as plt
-    from dr_bws.datacube import (
-        on_codeocean,
+    from dr_datacube import (
         datacube_config,
-        list_nwb_sources,
         get_session_ids_from_github,
+        list_nwb_sources,
+        on_codeocean,
     )
 
     lazynwb.config.anon = True
@@ -63,7 +61,6 @@ def _(lazynwb, nwb_sources, pl, session_id, subject_id):
         .collect()
     )
     eye.write_parquet("s3://aind-scratch-data/dynamic-routing/cache/nwb_components/v0.0.289/consolidated/eye_tracking.parquet")
-    return
 
 
 @app.cell
@@ -75,7 +72,6 @@ def _(lazynwb, nwb_sources, pl, session_id, subject_id):
         .collect()
     )
     face.write_parquet("s3://aind-scratch-data/dynamic-routing/cache/nwb_components/v0.0.289/consolidated/lp_front_camera.parquet")
-    return
 
 
 if __name__ == "__main__":

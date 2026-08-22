@@ -1,14 +1,14 @@
 # /// script
 # dependencies = [
 #     "altair==6.2.2",
-#     "dr-bws",
+#     "dr-datacube",
 #     "marimo",
 #     "polars==1.43.2",
 # ]
 # requires-python = "<3.12"
 #
 # [tool.uv.sources]
-# dr-bws = { git = "https://github.com/AllenNeuralDynamics/dr-bws-figures" }
+# dr-bws = { git = "https://github.com/AllenNeuralDynamics/dr-datacube" }
 # ///
 
 import marimo
@@ -23,13 +23,13 @@ def _():
     import pprint
 
     import lazynwb
-    import polars as pl
     import matplotlib.pyplot as plt
-    from dr_bws.datacube import (
-        on_codeocean,
+    import polars as pl
+    from dr_datacube import (
         datacube_config,
-        list_nwb_sources,
         get_session_ids_from_github,
+        list_nwb_sources,
+        on_codeocean,
     )
 
     lazynwb.config.anon = True
@@ -103,14 +103,12 @@ def _(eye_df, pl, plt):
     ax.set_ylim(0, 20_000)
     ax.set_xlabel("time (s)")
     ax.set_ylabel("pupil area (pixels)")
-    return
 
 
 @app.cell
 def _(lazynwb, nwb_sources, pprint):
     face_lf = lazynwb.scan_nwb(nwb_sources, table_path="processing/behavior/lp_front_camera")
     pprint.pprint(face_lf.collect_schema())
-    return
 
 
 if __name__ == "__main__":
