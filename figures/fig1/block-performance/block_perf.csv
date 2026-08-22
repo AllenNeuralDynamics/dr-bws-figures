@@ -1,4 +1,4 @@
-subject_id,session_id,block_index,rewarded_modality,vis_dprime,aud_dprime,cross_modality_dprime,signed_cross_modality_dprime,isfirst_block_aud,target,response_rate
+subject_id,session_id,block_index,rewarded_modality,vis_dprime,aud_dprime,cross_modality_dprime,signed_cross_modality_dprime,is_first_block_aud,target,response_rate
 626791,626791_2022-08-15,0,vis,2.516339785032338,-0.39523751317825573,3.0732675211951777,3.0732675211951777,false,aud,0.15
 626791,626791_2022-08-15,0,vis,2.516339785032338,-0.39523751317825573,3.0732675211951777,3.0732675211951777,false,vis,1.0
 626791,626791_2022-08-15,1,aud,-1.0211106338487372,1.5348986686804,1.438862250154771,-1.438862250154771,false,vis,0.4375

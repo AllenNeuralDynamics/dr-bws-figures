@@ -14,7 +14,7 @@
 
 import marimo
 
-__generated_with = "0.23.16"
+__generated_with = "0.24.0"
 app = marimo.App(width="full")
 
 
@@ -71,7 +71,7 @@ def _(get_lf, get_session_ids_from_github, pl):
         .filter(pl.col("session_id").is_in(get_session_ids_from_github("brainwide")))
         .select(
             "session_id",
-            pl.col("keywords").list.contains("first_block_aud").alias("isfirst_block_aud"),
+            pl.col("keywords").list.contains("first_block_aud").alias("is_first_block_aud"),
         )
     )
     return (sessions,)
@@ -96,11 +96,11 @@ def _(get_lf, pl, results_dir, sessions):
                 "aud_dprime",
                 "cross_modality_dprime",
                 "signed_cross_modality_dprime",
-                "isfirst_block_aud",
+                "is_first_block_aud",
             ],
         )
         .with_columns(pl.col("target").str.split("_").list.first())
-        .sort("session_id", "isfirst_block_aud", "block_index", "rewarded_modality")
+        .sort("session_id", "is_first_block_aud", "block_index", "rewarded_modality")
         .collect()
     )
     target_response_rate.write_csv(results_dir / "block_perf.csv")
@@ -112,7 +112,7 @@ def _(get_lf, pl, results_dir, sessions):
 def _(pl, results_dir, target_response_rate):
     target_response_rate_agg = (
         target_response_rate.group_by(
-            "subject_id", "block_index", "rewarded_modality", "target", "isfirst_block_aud"
+            "subject_id", "block_index", "rewarded_modality", "target", "is_first_block_aud"
         )
         .agg(
             pl.all(),
@@ -127,13 +127,13 @@ def _(pl, results_dir, target_response_rate):
             .name.suffix("_mean"),
             pl.col("session_id").n_unique().alias("n_sessions"),
         )
-        .group_by("block_index", "rewarded_modality", "target", "isfirst_block_aud")
+        .group_by("block_index", "rewarded_modality", "target", "is_first_block_aud")
         .agg(
             pl.selectors.ends_with("_mean").mean(),
             pl.col("subject_id").n_unique().alias("n_subjects"),
             pl.col("n_sessions").sum(),
         )
-        .sort("isfirst_block_aud", "block_index", "rewarded_modality")
+        .sort("is_first_block_aud", "block_index", "rewarded_modality")
     )
     target_response_rate_agg.write_csv(results_dir / "block_perf_agg.csv")
     target_response_rate_agg
@@ -147,7 +147,7 @@ def _(target_response_rate_agg):
             x="block_index:N",
             y="response_rate_mean",
             color="target",
-            column="isfirst_block_aud",
+            column="is_first_block_aud",
             tooltip=["response_rate_mean", "rewarded_modality", "n_subjects"],
         ).properties(width=200)
     )
@@ -161,7 +161,7 @@ def _(target_response_rate_agg):
             x="block_index:N",
             y="signed_cross_modality_dprime_mean",
             color="target",
-            column="isfirst_block_aud",
+            column="is_first_block_aud",
             tooltip=["signed_cross_modality_dprime_mean", "rewarded_modality", "n_subjects"],
         ).properties(width=200)
     )
@@ -173,7 +173,7 @@ def _(pl, target_response_rate_agg):
     (
         target_response_rate_agg.unpivot(
             on=["aud_dprime_mean", "vis_dprime_mean"],
-            index=["block_index", "rewarded_modality", "isfirst_block_aud", "n_subjects"],
+            index=["block_index", "rewarded_modality", "is_first_block_aud", "n_subjects"],
             value_name="dprime",
             variable_name="modality",
         )
@@ -182,7 +182,7 @@ def _(pl, target_response_rate_agg):
             x="block_index:N",
             y="dprime",
             color="modality",
-            column="isfirst_block_aud",
+            column="is_first_block_aud",
             tooltip=["dprime", "rewarded_modality", "n_subjects"],
         )
         .properties(width=200)
@@ -196,16 +196,44 @@ def _():
     figure_kwargs = {"figsize": (1.5, 2)}
 
     def format_ax(ax, data, targets):
+        block_modalities = (
+            data.select("block_index", "rewarded_modality")
+            .unique()
+            .sort("block_index")
+            .rows()
+        )
+        block_ticks = [block_index for block_index, _ in block_modalities]
         ax.set(
             xlabel="Block #",
-            xticks=sorted(data["block_index"].unique().to_list()),
+            xticks=block_ticks,
+            xlim=(block_ticks[0] - 0.5, block_ticks[-1] + 0.5),
         )
+        for block_index, rewarded_modality in block_modalities:
+            ax.axvspan(
+                block_index - 0.5,
+                block_index + 0.5,
+                ymin=1,
+                ymax=1.08,
+                facecolor="0.85" if rewarded_modality == "aud" else "white",
+                edgecolor="0.6",
+                linewidth=0.5,
+                clip_on=False,
+            )
+            ax.text(
+                block_index,
+                1.04,
+                "A" if rewarded_modality == "aud" else "V",
+                transform=ax.get_xaxis_transform(),
+                ha="center",
+                va="center",
+                fontsize=6,
+                clip_on=False,
+            )
         for side in ("right", "top"):
             ax.spines[side].set_visible(False)
         ax.tick_params(direction="out", top=False, right=False, labelsize=8)
         # if len(targets) == 2:
         #     ax.legend(frameon=False)
-
     return colors, figure_kwargs, format_ax
 
 
@@ -227,9 +255,9 @@ def _(
 
     _subject_data = (
         target_response_rate.filter(
-            pl.col("isfirst_block_aud") == first_block_aud,
+            pl.col("is_first_block_aud") == first_block_aud,
         )
-        .group_by("subject_id", "block_index", "target")
+        .group_by("subject_id", "block_index", "rewarded_modality", "target")
         .agg(pl.col("response_rate").mean())
         .sort("subject_id", "target", "block_index")
     )
@@ -260,7 +288,7 @@ def _(
                     _trace["response_rate"].to_numpy(),
                     color=colors[_target],
                     # alpha=0.15,
-                    linewidth=0.1,
+                    linewidth=0.05,
                     zorder=1,
                     clip_on=False,
                 )
@@ -269,15 +297,16 @@ def _(
         if _target_summary.is_empty():
             continue
 
+        _meanlinewidth = 0.8 
         _x = _target_summary["block_index"].to_numpy()
         _mean = _target_summary["mean"].to_numpy()
         _ax.plot(
             _x,
             _mean,
             color=colors[_target],
-            marker=".",
+            # marker=".",
             markersize=2,
-            linewidth=1.0,
+            linewidth=_meanlinewidth,
             label=f"{_target} target",
             zorder=3,
             clip_on=False,
@@ -297,7 +326,7 @@ def _(
                 yerr=np.vstack((_mean - _lower, _upper - _mean)),
                 fmt="none",
                 ecolor=colors[_target],
-                elinewidth=1,
+                elinewidth=_meanlinewidth,
                 capsize=0,
                 zorder=2,
                 clip_on=False,
@@ -331,11 +360,11 @@ def _(
 ):
     _subject_data = (
         target_response_rate.filter(
-            pl.col("isfirst_block_aud") == first_block_aud,
+            pl.col("is_first_block_aud") == first_block_aud,
             pl.col("target")
             == "aud",  # doesn't matter which we choose here - signed dprime is the same
         )
-        .group_by("subject_id", "block_index", "target")
+        .group_by("subject_id", "block_index", "rewarded_modality", "target")
         .agg(pl.col("signed_cross_modality_dprime").mean())
         .sort("subject_id", "target", "block_index")
     )
@@ -361,20 +390,22 @@ def _(
                 _trace["signed_cross_modality_dprime"].to_numpy(),
                 color="k",
                 # alpha=0.15,
-                linewidth=0.15,
+                linewidth=0.05,
                 zorder=1,
                 clip_on=False,
             )
 
     _x = _summary["block_index"].to_numpy()
     _mean = _summary["mean"].to_numpy()
+    _meanlinewidth = 0.8
+
     _ax.plot(
         _x,
         _mean,
         color="k",
-        marker=".",
+        # marker=".",
         markersize=2,
-        linewidth=1,
+        linewidth=_meanlinewidth,
         zorder=3,
         clip_on=False,
     )
@@ -391,7 +422,7 @@ def _(
             yerr=np.vstack((_mean - _lower, _upper - _mean)),
             fmt="none",
             ecolor="k",
-            elinewidth=1,
+            elinewidth=_meanlinewidth,
             capsize=0,
             zorder=2,
             clip_on=False,
@@ -427,7 +458,7 @@ def _(
 
     _subject_data = (
         target_response_rate.filter(
-            pl.col("isfirst_block_aud") == first_block_aud,
+            pl.col("is_first_block_aud") == first_block_aud,
         )
         .unpivot(
             on=["aud_dprime", "vis_dprime"],
@@ -467,7 +498,7 @@ def _(
                     _trace["dprime"].to_numpy(),
                     color=colors[_modality],
                     # alpha=0.15,
-                    linewidth=0.1,
+                    linewidth=0.05,
                     zorder=1,
                     clip_on=False,
                 )
@@ -478,13 +509,14 @@ def _(
 
         _x = _target_summary["block_index"].to_numpy()
         _mean = _target_summary["mean"].to_numpy()
+        _meanlinewidth = 0.8
         _ax.plot(
             _x,
             _mean,
             color=colors[_modality],
-            marker=".",
+            # marker=".",
             markersize=2,
-            linewidth=1.0,
+            linewidth=_meanlinewidth,
             label=f"{_modality}",
             zorder=3,
             clip_on=False,
@@ -504,7 +536,7 @@ def _(
                 yerr=np.vstack((_mean - _lower, _upper - _mean)),
                 fmt="none",
                 ecolor=colors[_modality],
-                elinewidth=1,
+                elinewidth=_meanlinewidth,
                 capsize=0,
                 zorder=2,
                 clip_on=False,

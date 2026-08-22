@@ -21,7 +21,6 @@ app = marimo.App(width="full")
 
 @app.cell
 def _():
-    import os
     import pathlib
     from collections.abc import Iterable
 
