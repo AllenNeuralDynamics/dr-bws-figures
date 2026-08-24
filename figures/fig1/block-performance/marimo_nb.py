@@ -122,13 +122,13 @@ def _(pl, results_dir, target_response_rate):
                 "aud_dprime",
                 "vis_dprime",
             )
-            .mean()
-            .name.suffix("_mean"),
+            .median()
+            .name.suffix("_median"),
             pl.col("session_id").n_unique().alias("n_sessions"),
         )
         .group_by("block_index", "rewarded_modality", "target", "is_first_block_aud")
         .agg(
-            pl.selectors.ends_with("_mean").mean(),
+            pl.selectors.ends_with("_median").median(),
             pl.col("subject_id").n_unique().alias("n_subjects"),
             pl.col("n_sessions").sum(),
         )
@@ -144,10 +144,10 @@ def _(target_response_rate_agg):
     (
         target_response_rate_agg.plot.line(
             x="block_index:N",
-            y="response_rate_mean",
+            y="response_rate_median",
             color="target",
             column="is_first_block_aud",
-            tooltip=["response_rate_mean", "rewarded_modality", "n_subjects"],
+            tooltip=["response_rate_median", "rewarded_modality", "n_subjects"],
         ).properties(width=200)
     )
 
@@ -157,10 +157,10 @@ def _(target_response_rate_agg):
     (
         target_response_rate_agg.plot.line(
             x="block_index:N",
-            y="signed_cross_modality_dprime_mean",
+            y="signed_cross_modality_dprime_median",
             color="target",
             column="is_first_block_aud",
-            tooltip=["signed_cross_modality_dprime_mean", "rewarded_modality", "n_subjects"],
+            tooltip=["signed_cross_modality_dprime_median", "rewarded_modality", "n_subjects"],
         ).properties(width=200)
     )
 
@@ -169,7 +169,7 @@ def _(target_response_rate_agg):
 def _(pl, target_response_rate_agg):
     (
         target_response_rate_agg.unpivot(
-            on=["aud_dprime_mean", "vis_dprime_mean"],
+            on=["aud_dprime_median", "vis_dprime_median"],
             index=["block_index", "rewarded_modality", "is_first_block_aud", "n_subjects"],
             value_name="dprime",
             variable_name="modality",
@@ -188,6 +188,7 @@ def _(pl, target_response_rate_agg):
 
 @app.cell
 def _():
+    colors = {"vis": "#0000ff", "aud": "#ec008c"}
     colors = {"vis": "#0072B2", "aud": "#D55E00"}
     figure_kwargs = {"figsize": (1.5, 2)}
 
@@ -254,7 +255,7 @@ def _(
             pl.col("is_first_block_aud") == first_block_aud,
         )
         .group_by("subject_id", "block_index", "rewarded_modality", "target")
-        .agg(pl.col("response_rate").mean())
+        .agg(pl.col("response_rate").median())
         .sort("subject_id", "target", "block_index")
     )
     if len(_targets) == 1:
@@ -263,7 +264,7 @@ def _(
     _summary = (
         _subject_data.group_by("block_index", "target")
         .agg(
-            pl.col("response_rate").mean().alias("mean"),
+            pl.col("response_rate").median().alias("median"),
             pl.col("response_rate").std().fill_null(0).alias("std"),
             pl.len().alias("n_subjects"),
         )
@@ -295,10 +296,10 @@ def _(
 
         _meanlinewidth = 0.8 
         _x = _target_summary["block_index"].to_numpy()
-        _mean = _target_summary["mean"].to_numpy()
+        _median = _target_summary["median"].to_numpy()
         _ax.plot(
             _x,
-            _mean,
+            _median,
             color=colors[_target],
             # marker=".",
             markersize=2,
@@ -314,12 +315,12 @@ def _(
             )
             if error_bars == "ci95":
                 _sem = 1.96 * _sem
-            _lower = np.clip(_mean - _sem, 0, 1)
-            _upper = np.clip(_mean + _sem, 0, 1)
+            _lower = np.clip(_median - _sem, 0, 1)
+            _upper = np.clip(_median + _sem, 0, 1)
             _ax.errorbar(
                 _x,
-                _mean,
-                yerr=np.vstack((_mean - _lower, _upper - _mean)),
+                _median,
+                yerr=np.vstack((_median - _lower, _upper - _median)),
                 fmt="none",
                 ecolor=colors[_target],
                 elinewidth=_meanlinewidth,
@@ -360,13 +361,13 @@ def _(
             == "aud",  # doesn't matter which we choose here - signed dprime is the same
         )
         .group_by("subject_id", "block_index", "rewarded_modality", "target")
-        .agg(pl.col("signed_cross_modality_dprime").mean())
+        .agg(pl.col("signed_cross_modality_dprime").median())
         .sort("subject_id", "target", "block_index")
     )
     _summary = (
         _subject_data.group_by("block_index", "target")
         .agg(
-            pl.col("signed_cross_modality_dprime").mean().alias("mean"),
+            pl.col("signed_cross_modality_dprime").median().alias("median"),
             pl.col("signed_cross_modality_dprime").std().fill_null(0).alias("std"),
             pl.len().alias("n_subjects"),
         )
@@ -391,12 +392,12 @@ def _(
             )
 
     _x = _summary["block_index"].to_numpy()
-    _mean = _summary["mean"].to_numpy()
+    _median = _summary["median"].to_numpy()
     _meanlinewidth = 0.8
 
     _ax.plot(
         _x,
-        _mean,
+        _median,
         color="k",
         # marker=".",
         markersize=2,
@@ -409,12 +410,12 @@ def _(
         _sem = _summary["std"].to_numpy() / np.sqrt(_summary["n_subjects"].to_numpy())
         if error_bars == "ci95":
             _sem = 1.96 * _sem
-        _lower = _mean - _sem
-        _upper = _mean + _sem
+        _lower = _median - _sem
+        _upper = _median + _sem
         _ax.errorbar(
             _x,
-            _mean,
-            yerr=np.vstack((_mean - _lower, _upper - _mean)),
+            _median,
+            yerr=np.vstack((_median - _lower, _upper - _median)),
             fmt="none",
             ecolor="k",
             elinewidth=_meanlinewidth,
@@ -462,7 +463,7 @@ def _(
         )
         .with_columns(pl.col("modality").str.split("_").list.get(0))
         .group_by("subject_id", "block_index", "modality", "rewarded_modality")
-        .agg(pl.col("dprime").mean())
+        .agg(pl.col("dprime").median())
         .sort("subject_id", "modality", "block_index")
     )
     if len(_modalities) == 1:
@@ -471,7 +472,7 @@ def _(
     _summary = (
         _subject_data.group_by("block_index", "modality")
         .agg(
-            pl.col("dprime").mean().alias("mean"),
+            pl.col("dprime").median().alias("median"),
             pl.col("dprime").std().fill_null(0).alias("std"),
             pl.len().alias("n_subjects"),
         )
@@ -502,11 +503,11 @@ def _(
             continue
 
         _x = _target_summary["block_index"].to_numpy()
-        _mean = _target_summary["mean"].to_numpy()
+        _median = _target_summary["median"].to_numpy()
         _meanlinewidth = 0.8
         _ax.plot(
             _x,
-            _mean,
+            _median,
             color=colors[_modality],
             # marker=".",
             markersize=2,
@@ -522,12 +523,12 @@ def _(
             )
             if error_bars == "ci95":
                 _sem = 1.96 * _sem
-            _lower = _mean - _sem
-            _upper = _mean + _sem
+            _lower = _median - _sem
+            _upper = _median + _sem
             _ax.errorbar(
                 _x,
-                _mean,
-                yerr=np.vstack((_mean - _lower, _upper - _mean)),
+                _median,
+                yerr=np.vstack((_median - _lower, _upper - _median)),
                 fmt="none",
                 ecolor=colors[_modality],
                 elinewidth=_meanlinewidth,
