@@ -1,3 +1,3 @@
 ax,transition,stimulus,test,unit,n,last_before_mean,first_after_mean,mean_difference,median_difference,statistic,p_value
-0,to_rewarded,rewarded target stim,two-sided Wilcoxon signed-rank,mouse,34,0.36552790346907993,0.442684766214178,0.07715686274509806,0.09999999999999998,120.5,0.06002720117337385
+0,to_rewarded,rewarded target stim,two-sided Wilcoxon signed-rank,mouse,34,0.36552790346908,0.442684766214178,0.07715686274509805,0.09999999999999998,120.5,0.06002720117337385
 1,to_unrewarded,unrewarded target stim,two-sided Wilcoxon signed-rank,mouse,34,0.9273529411764706,0.5087556561085973,-0.4185972850678733,-0.4533333333333333,0.0,7.556944317658534e-7
