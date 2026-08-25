@@ -120,7 +120,8 @@ def _(
     trimesh,
 ):
     PROBE_LENGTH_MM = 3.840
-    PROBE_RADIUS_MM = 0.005
+    PROBE_RADIUS_MM = 0.0035
+    PROBE_SURFACE_CLEARANCE_MM = 0.6
 
     def load_electrodes(
         *,
@@ -203,21 +204,50 @@ def _(
         matrix = trimesh.geometry.align_vectors([0.0, 0.0, -1.0], direction / norm)
         return matrix[:3, :3]
 
-    def make_probe_mesh() -> trimesh.Trimesh:
+    def probe_length_to_surface(
+        tip: np.ndarray,
+        tip_to_base: np.ndarray,
+        brain: trimesh.Trimesh,
+        *,
+        clearance_mm: float = PROBE_SURFACE_CLEARANCE_MM,
+    ) -> float:
+        """Find the probe length needed to end at a fixed surface clearance."""
+        direction = np.asarray(tip_to_base, dtype=np.float64)
+        direction /= np.linalg.norm(direction)
+        locations, _, _ = brain.ray.intersects_location(
+            ray_origins=np.asarray([tip]),
+            ray_directions=np.asarray([direction]),
+            multiple_hits=True,
+        )
+        distances = np.dot(locations - tip, direction)
+        positive_distances = distances[distances > 1e-6]
+        if positive_distances.size == 0:
+            raise ValueError("Could not find the brain surface along a probe direction")
+        return float(positive_distances.min() + clearance_mm)
+
+    def make_probe_mesh(length_mm: float = PROBE_LENGTH_MM) -> trimesh.Trimesh:
         """Make a thin mesh whose local tip is at the origin."""
         mesh = trimesh.creation.cylinder(
             radius=PROBE_RADIUS_MM,
-            height=PROBE_LENGTH_MM,
+            height=length_mm,
             sections=8,
         )
-        mesh.apply_translation([0.0, 0.0, -PROBE_LENGTH_MM / 2.0])
+        mesh.apply_translation([0.0, 0.0, -length_mm / 2.0])
         return mesh
 
     def build_scene(
         electrodes_df: pl.DataFrame,
         brain: Path | trimesh.Trimesh | None = None,
+        *,
+        normalize_probe_lengths: bool = True,
+        surface_clearance_mm: float = PROBE_SURFACE_CLEARANCE_MM,
     ):
-        """Build a low-point scene from electrode coordinates."""
+        """Build a low-point scene from electrode coordinates.
+
+        When ``normalize_probe_lengths`` is enabled, each probe ends at the
+        same clearance from the brain surface along its measured insertion
+        direction.
+        """
         tip_df = electrodes_df.filter(pl.col("loc") == "tip")
         base_df = electrodes_df.filter(pl.col("loc") == "base")
         if tip_df.height == 0 or base_df.height == 0:
@@ -249,12 +279,9 @@ def _(
         assets: dict[str, AssetSpec] = {}
         scene = Scene()
 
-        # PyVista point actors have one material per actor. Split the original
-        # per-particle colors into red tips and cyan bases.
-        for loc, df, color in (
-            ("tip", tip_df, "#ff0000"),
-            ("base", base_df, "#00ffff"),
-        ):
+        # PyVista point actors have one material per actor. Render only the
+        # magenta bases; tip coordinates are still used to position the probes.
+        for loc, df, color in (("base", base_df, "#000000"),):
             asset_key = f"electrodes:{loc}"
             assets[asset_key] = AssetSpec(
                 key=asset_key,
@@ -262,7 +289,7 @@ def _(
                 default_material=Material(
                     name=f"electrodes-{loc}",
                     color_hex_str=color,
-                    point_size=7.0,
+                    point_size=10.0,
                 ),
                 points=PointsTransformable(
                     points_in_scene_mm(df, ml_midline_mm=ml_midline_mm)
@@ -275,18 +302,6 @@ def _(
                     tags={"electrodes", loc},
                 )
             )
-
-        probe_asset_key = "probe:electrode"
-        assets[probe_asset_key] = AssetSpec(
-            key=probe_asset_key,
-            kind="mesh",
-            default_material=Material(
-                name="probe",
-                color_hex_str="#424242",
-                opacity=1.0,
-            ),
-            mesh=MeshTransformable(make_probe_mesh()),
-        )
 
         # The measured tip-to-base direction avoids Urchin's azimuth/elevation
         # convention and keeps coordinates in the scene's ML/DV/AP order.
@@ -304,6 +319,28 @@ def _(
             )[0]
             session_id = insertion["session_id"][0]
             group_name = insertion["group_name"][0]
+            tip_to_base = base - tip
+            probe_length = (
+                probe_length_to_surface(
+                    tip,
+                    tip_to_base,
+                    brain_geometry,
+                    clearance_mm=surface_clearance_mm,
+                )
+                if normalize_probe_lengths
+                else PROBE_LENGTH_MM
+            )
+            probe_asset_key = f"probe:{session_id}:{group_name}"
+            assets[probe_asset_key] = AssetSpec(
+                key=probe_asset_key,
+                kind="mesh",
+                default_material=Material(
+                    name="probe",
+                    color_hex_str="#424242",
+                    opacity=1.0,
+                ),
+                mesh=MeshTransformable(make_probe_mesh(probe_length)),
+            )
             node_key = f"probe:{session_id}:{group_name}"
             scene.upsert(
                 NodeInstance(
@@ -313,7 +350,7 @@ def _(
                     transform=TransformChain.new(
                         [
                             AffineTransform(
-                                rotation=probe_rotation(base - tip),
+                                rotation=probe_rotation(tip_to_base),
                                 translation=tip,
                             )
                         ]
@@ -327,7 +364,7 @@ def _(
             kind="mesh",
             default_material=Material(
                 name="brain",
-                color_hex_str="#b8b8b8",
+                color_hex_str="#a5a5a5",
                 opacity=0.15,
             ),
             mesh=MeshTransformable(brain_geometry),
@@ -343,15 +380,23 @@ def _(
         brain: Path | trimesh.Trimesh | None = None,
         width: int = 2000,
         height: int = 2000,
+        normalize_probe_lengths: bool = True,
+        surface_clearance_mm: float = PROBE_SURFACE_CLEARANCE_MM,
+        camera_zoom: float = 1.25,
     ):
         """Render named anatomical views and save one PNG per view."""
-        catalog, scene = build_scene(electrodes_df, brain=brain)
+        catalog, scene = build_scene(
+            electrodes_df,
+            brain=brain,
+            normalize_probe_lengths=normalize_probe_lengths,
+            surface_clearance_mm=surface_clearance_mm,
+        )
         plotter = pv.Plotter(
             off_screen=True,
             window_size=(width, height),
         )
-        # Urchin's default camera background is white; retain it so the
-        # optional black transparent brain surface remains visible.
+        # Keep a white render background for contrast; screenshot export below
+        # writes it as transparent pixels.
         plotter.set_background("white")
 
         adapter = RendererAdapter(
@@ -393,9 +438,10 @@ def _(
         for view_name, set_view in views.items():
             set_view()
             plotter.reset_camera()
+            plotter.camera.zoom(camera_zoom)
             plotter.render()
             view_output = output.with_name(f"{output.stem}_{view_name}{output.suffix}")
-            plotter.screenshot(str(view_output), transparent_background=False)
+            plotter.screenshot(str(view_output), transparent_background=True)
             snapshots.append(view_output)
 
         plotter.close()
@@ -551,6 +597,8 @@ def _(Path, load_pinpoint_atlas_mesh, on_codeocean):
     )
     width = 2000
     height = 2000
+    normalize_probe_lengths = True
+    camera_zoom = 1.25
     return (
         atlas_name,
         atlas_resolution_um,
@@ -558,6 +606,8 @@ def _(Path, load_pinpoint_atlas_mesh, on_codeocean):
         atlas_version,
         brain,
         height,
+        camera_zoom,
+        normalize_probe_lengths,
         output,
         width,
     )
@@ -573,6 +623,8 @@ def _(
     brain,
     electrodes_df,
     height,
+    camera_zoom,
+    normalize_probe_lengths,
     output,
     render,
     width,
@@ -593,6 +645,8 @@ def _(
         brain=brain,
         width=width,
         height=height,
+        normalize_probe_lengths=normalize_probe_lengths,
+        camera_zoom=camera_zoom,
     )
     if isinstance(rendered, list):
         for snapshot in rendered:
