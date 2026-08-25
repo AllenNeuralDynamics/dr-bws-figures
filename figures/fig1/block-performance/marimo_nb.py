@@ -340,6 +340,7 @@ def _(
     )
     _fig.tight_layout()
     _fig.savefig(results_dir / "response-probability.svg")
+    _fig.savefig(results_dir / "response-probability.png", transparent=True, dpi=300)
     _fig
 
 
@@ -434,6 +435,7 @@ def _(
     _ax.axhline(0, lw=0.5, zorder=0, c="grey")
     _fig.tight_layout()
     _fig.savefig(results_dir / "cross-modality-dprime.svg")
+    _fig.savefig(results_dir / "cross-modality-dprime.png", transparent=True, dpi=300)
     _fig
 
 
@@ -547,6 +549,7 @@ def _(
     _ax.axhline(0, lw=0.5, zorder=0, c="grey")
     _fig.tight_layout()
     _fig.savefig(results_dir / "intramodal-dprime.svg")
+    _fig.savefig(results_dir / "intramodal-dprime.png", transparent=True, dpi=300)
     _fig
 
 
