@@ -189,8 +189,8 @@ def _(pl, target_response_rate_agg):
 @app.cell
 def _():
     colors = {"vis": "#0000ff", "aud": "#ec008c"}
-    colors = {"vis": "#0072B2", "aud": "#D55E00"}
-    figure_kwargs = {"figsize": (1.5, 2)}
+    colors = {"vis": "green", "aud": "magenta"}
+    figure_kwargs = {"figsize": (1.75, 2)}
 
     def format_ax(ax, data, targets):
         block_modalities = (
@@ -203,6 +203,7 @@ def _():
         ax.set(
             xlabel="Block #",
             xticks=block_ticks,
+            xticklabels=[str(block_index + 1) for block_index in block_ticks],
             xlim=(block_ticks[0] - 0.5, block_ticks[-1] + 0.5),
         )
         for block_index, rewarded_modality in block_modalities:
@@ -211,7 +212,7 @@ def _():
                 block_index + 0.5,
                 ymin=1,
                 ymax=1.08,
-                facecolor="0.85" if rewarded_modality == "aud" else "white",
+                facecolor="0.85" if rewarded_modality == "vis" else "white",
                 edgecolor="0.6",
                 linewidth=0.5,
                 clip_on=False,
@@ -335,6 +336,7 @@ def _(
         if len(_targets) == 2
         else f"{_targets[0].capitalize()} target response probability",
         ylim=(0, 1.05),
+        yticks=(0, 0.5, 1.0),
     )
     _fig.tight_layout()
     _fig.savefig(results_dir / "response-probability.svg")
