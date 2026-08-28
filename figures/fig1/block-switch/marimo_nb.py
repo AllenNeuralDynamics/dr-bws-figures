@@ -15,7 +15,7 @@
 
 import marimo
 
-__generated_with = "0.23.16"
+__generated_with = "0.24.0"
 app = marimo.App(width="full")
 
 
@@ -48,7 +48,6 @@ def _():
         pathlib.Path(__file__).resolve().parent if not on_codeocean() else pathlib.Path("/root/capsule/results")
     )
     return (
-        Iterable,
         get_lf,
         get_session_ids_from_github,
         np,
@@ -82,7 +81,7 @@ def _(get_lf, get_session_ids_from_github, pl):
 
 
 @app.cell
-def _(Iterable, np, pl, plt, wilcoxon):
+def _(np, pl, plt, wilcoxon):
     from matplotlib.patches import PathPatch
     from matplotlib.path import Path
 
@@ -96,22 +95,19 @@ def _(Iterable, np, pl, plt, wilcoxon):
         annotate_context: tuple[str, str] = (),
     ) -> None:
         ax.axvline(x=0, color="grey", lw=0.5)
-        # green patch for instruction trials
-        # if is_switch_to_rewarded:
-        #     ax.axvspan(xmin=0, xmax=5, color=[0.9, 0.95, 0.9], lw=0, zorder=-1)
+        # Patch the first five post-switch trials for newly rewarded targets.
+        if is_switch_to_rewarded:
+            ax.axvspan(xmin=0, xmax=5, color='slateblue', alpha=0.5, lw=0, zorder=-1)
         for side in ("right", "top"):
             ax.spines[side].set_visible(False)
         ax.tick_params(direction="out", top=False, right=False)
-        xticks = np.arange(-preTrials, postTrials + 1, 1)
-        xticks = xticks[xticks != 0]
+        xticks = np.arange(-preTrials, postTrials + 1, 5)
         ax.set_xticks(xticks)
-        ax.set_xticklabels([str(x) if abs(x) == 1 else "" for x in xticks], fontsize=8)
-        ax.set_aspect(10)
+        ax.set_xticklabels([str(x) if abs(x) in (15,) else "" for x in xticks], fontsize=8)
         ax.set_yticks([0, 0.5, 1])
         ax.set_yticklabels([0, 0.5, 1], fontsize=8)
         ax.set_xlim([-preTrials - 0.5, postTrials + 0.5])
-        ax.set_ylim([0, 1.01])
-        ax.set_ylabel("Response probability")
+        ax.set_ylim([0, 1.05])
         ax.tick_params(direction="out", top=False, right=False)
 
         # ax.legend(bbox_to_anchor=(1,1),loc='upper left')
@@ -126,10 +122,10 @@ def _(Iterable, np, pl, plt, wilcoxon):
             marker_half_widths = []
             for i, state in enumerate(states):
                 x = transition_x + (-0.13 if i == 0 else 0.13)
-                marker_half_widths.append(0.08 if state == "unrewarded" else 0.06)
+                marker_half_widths.append(0.06 if state == "unrewarded" else 0.03375)
                 if state == "unrewarded":
                     ax.plot(
-                        [x - 0.08, x + 0.08],
+                        [x - 0.06, x + 0.06],
                         [1.1, 1.1],
                         color="#d62728",
                         lw=2,
@@ -139,20 +135,23 @@ def _(Iterable, np, pl, plt, wilcoxon):
                         zorder=200,
                     )
                 else:
+                    drop_half_width = 0.03375
+                    drop_shoulder_width = 0.0075
+                    drop_base_half_width = 0.016875
                     drop = Path(
                         [
                             (x, 1.145),
-                            (x - 0.014, 1.12),
-                            (x - 0.06, 1.10),
-                            (x - 0.06, 1.085),
-                            (x - 0.06, 1.06),
-                            (x - 0.03, 1.045),
+                            (x - drop_shoulder_width, 1.12),
+                            (x - drop_half_width, 1.10),
+                            (x - drop_half_width, 1.085),
+                            (x - drop_half_width, 1.06),
+                            (x - drop_base_half_width, 1.045),
                             (x, 1.045),
-                            (x + 0.03, 1.045),
-                            (x + 0.06, 1.06),
-                            (x + 0.06, 1.085),
-                            (x + 0.06, 1.10),
-                            (x + 0.014, 1.12),
+                            (x + drop_base_half_width, 1.045),
+                            (x + drop_half_width, 1.06),
+                            (x + drop_half_width, 1.085),
+                            (x + drop_half_width, 1.10),
+                            (x + drop_shoulder_width, 1.12),
                             (x, 1.145),
                             (x, 1.145),
                         ],
@@ -193,10 +192,12 @@ def _(Iterable, np, pl, plt, wilcoxon):
                 xycoords=ax.transAxes,
                 textcoords=ax.transAxes,
                 arrowprops={
-                    "arrowstyle": "-|>",
+                    "arrowstyle": "->",
                     "color": "black",
-                    "lw": 0.8,
-                    "mutation_scale": 4,
+                    "lw": 0.4,
+                    "shrinkA": 0,
+                    "shrinkB": 0,
+                    "mutation_scale": 5,
                 },
                 annotation_clip=False,
                 zorder=201,
@@ -208,7 +209,7 @@ def _(Iterable, np, pl, plt, wilcoxon):
                     1.1,
                     annotation,
                     color=color,
-                    fontsize=8,
+                    fontsize=6,
                     va="center",
                     ha="center",
                 )
@@ -221,8 +222,8 @@ def _(Iterable, np, pl, plt, wilcoxon):
             zip(axes, ("rewarded target stim", "unrewarded target stim"), "kk")
         ):
             is_switch_to_rewarded = "unrewarded" not in stimLbl
-            preTrials = 2
-            postTrials = 2
+            preTrials = 15
+            postTrials = 15
             x = np.arange(-preTrials, postTrials + 1)
             y = []
             for subject_id, subject_df in trials_df.group_by(["subject_id"]):
@@ -288,50 +289,73 @@ def _(Iterable, np, pl, plt, wilcoxon):
                 }
             )
             m = np.nanmean(y, axis=0)
-            # There is no trial at x=0; omit that placeholder so matplotlib
-            # connects the last pre-switch point to the first post-switch point.
-            line_mask = ~np.isnan(m)
-            pre_line_mask = line_mask & (x < 0)
-            post_line_mask = line_mask & (x > 0)
+            # Shift the pre-switch and post-switch traces toward the context
+            # change so the final pre point and first post point both land at
+            # x=0. They must be plotted separately because they can have
+            # different values at that shared x-coordinate.
+            pre_x = x[:preTrials] + 1
+            post_x = x[preTrials + 1 :] - 1
+            _meanlinewidth = 0.8
             ax.plot(
-                x[pre_line_mask],
-                m[pre_line_mask],
+                pre_x,
+                m[:preTrials],
                 color=clr,
                 label=stimLbl,
-                lw=0.3,
+                linewidth=_meanlinewidth,
                 zorder=99,
             )
             ax.plot(
-                x[post_line_mask],
-                m[post_line_mask],
+                post_x,
+                m[preTrials + 1 :],
                 color=clr,
-                lw=0.3,
-                zorder=99,
-            )
-            ax.plot(
-                [x[pre_line_mask][-1], x[post_line_mask][0]],
-                [m[pre_line_mask][-1], m[post_line_mask][0]],
-                color=clr,
-                ls="--",
-                lw=0.3,
+                linewidth=_meanlinewidth,
                 zorder=99,
             )
             # Match point colors to the rewarded/unrewarded annotation colors.
             pre_color, post_color = ("r", "c") if is_switch_to_rewarded else ("c", "r")
-            for point_mask, point_color in ((x < 0, pre_color), (x > 0, post_color)):
+            for point_x, point_y, point_color in (
+                (pre_x[-1], m[preTrials - 1], pre_color),
+                (post_x[0], m[preTrials + 1], post_color),
+            ):
                 ax.plot(
-                    x[point_mask],
-                    m[point_mask],
+                    [point_x],
+                    [point_y],
                     ".",
                     color=point_color,
                     ms=4,
                     zorder=99,
                     clip_on=False,
                 )
+            if is_switch_to_rewarded:
+                ax.plot(
+                    post_x[1:5],
+                    m[preTrials + 2 : preTrials + 6],
+                    ".",
+                    color="black",
+                    ms=4,
+                    zorder=100,
+                )
             is_sem = False
             if is_sem:
                 s = np.nanstd(y, axis=0) / (len(y) ** 0.5)
-                ax.fill_between(x, m + s, m - s, color=clr, alpha=0.1, edgecolor="none", zorder=50)
+                ax.fill_between(
+                    pre_x,
+                    (m + s)[:preTrials],
+                    (m - s)[:preTrials],
+                    color=clr,
+                    alpha=0.1,
+                    edgecolor="none",
+                    zorder=50,
+                )
+                ax.fill_between(
+                    post_x,
+                    (m + s)[preTrials + 1 :],
+                    (m - s)[preTrials + 1 :],
+                    color=clr,
+                    alpha=0.1,
+                    edgecolor="none",
+                    zorder=50,
+                )
             else:
                 y = np.array(y)
                 lower = np.full(len(m), np.nan)
@@ -343,20 +367,36 @@ def _(Iterable, np, pl, plt, wilcoxon):
                         [np.nanmean(np.random.choice(ys, size=ys.size, replace=True)) for _ in range(1000)],
                         (5, 95),
                     )
-                ax.fill_between(x, upper, lower, color=clr, alpha=0.1, edgecolor="none", zorder=50)
+                ax.fill_between(
+                    pre_x,
+                    upper[:preTrials],
+                    lower[:preTrials],
+                    color=clr,
+                    alpha=0.1,
+                    edgecolor="none",
+                    zorder=50,
+                )
+                ax.fill_between(
+                    post_x,
+                    upper[preTrials + 1 :],
+                    lower[preTrials + 1 :],
+                    color=clr,
+                    alpha=0.1,
+                    edgecolor="none",
+                    zorder=50,
+                )
             format_ax(ax, ax_idx, is_switch_to_rewarded, preTrials, postTrials, True)
             print(len(y), "mice")
             ax.set_zorder(199)
-
-            plt.tight_layout()
 
             if late_autorewards is not None:
                 autorewards_name = "late-autorewards" if late_autorewards else "early-autorewards"
             else:
                 autorewards_name = "all-autorewards"
             # utils.savefig(__file__, fig, suffix=autorewards_name)
-        fig.supxlabel("N stim presentations\nfrom context change", fontsize=8, y=0.08)
-        fig.tight_layout()
+        fig.subplots_adjust(left=0.15, right=0.98, bottom=0.24, top=0.80, wspace=0.1)
+        fig.supylabel("Response probability", fontsize=8, x=0.02, y=0.52, va="center")
+        fig.supxlabel("N target trials relative to context change", fontsize=8, x=0.56, y=0.04)
         return fig, pl.DataFrame(transition_stats_rows)
 
     return (plot,)
@@ -365,8 +405,16 @@ def _(Iterable, np, pl, plt, wilcoxon):
 @app.cell
 def _(plot, results_dir, trials):
     fig, transition_stats = plot(trials, late_autorewards=None)  # both targets
-    fig.savefig(results_dir / "block-switch.svg")
+    save_kwargs = {"bbox_inches": "tight", "pad_inches": 0.05}
+    fig.savefig(results_dir / "block-switch.svg", **save_kwargs)
+    fig.savefig(
+        results_dir / "block-switch.png",
+        dpi=300,
+        transparent=True,
+        **save_kwargs,
+    )
     transition_stats.write_csv(results_dir / "block-switch-stats.csv")
+    return
 
 
 @app.cell
