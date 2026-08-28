@@ -95,15 +95,14 @@ def _(np, pl, plt, wilcoxon):
         annotate_context: tuple[str, str] = (),
     ) -> None:
         ax.axvline(x=0, color="grey", lw=0.5)
-        # Patch the first five post-switch trials for newly rewarded targets.
-        if is_switch_to_rewarded:
-            ax.axvspan(xmin=0, xmax=5, color='slateblue', alpha=0.5, lw=0, zorder=-1)
+        # Patch the first five post-switch trials.
+        ax.axvspan(xmin=0, xmax=5, color="slateblue", alpha=0.5, lw=0, zorder=-1)
         for side in ("right", "top"):
             ax.spines[side].set_visible(False)
         ax.tick_params(direction="out", top=False, right=False)
         xticks = np.arange(-preTrials, postTrials + 1, 5)
         ax.set_xticks(xticks)
-        ax.set_xticklabels([str(x) if abs(x) in (15,) else "" for x in xticks], fontsize=8)
+        ax.set_xticklabels([str(x) if x in (-15, 0, 15) else "" for x in xticks], fontsize=8)
         ax.set_yticks([0, 0.5, 1])
         ax.set_yticklabels([0, 0.5, 1], fontsize=8)
         ax.set_xlim([-preTrials - 0.5, postTrials + 0.5])
@@ -293,8 +292,8 @@ def _(np, pl, plt, wilcoxon):
             # change so the final pre point and first post point both land at
             # x=0. They must be plotted separately because they can have
             # different values at that shared x-coordinate.
-            pre_x = x[:preTrials] + 1
-            post_x = x[preTrials + 1 :] - 1
+            pre_x = x[:preTrials]
+            post_x = x[preTrials + 1 :] + (5 if not is_switch_to_rewarded else 0)
             _meanlinewidth = 0.8
             ax.plot(
                 pre_x,
@@ -396,7 +395,7 @@ def _(np, pl, plt, wilcoxon):
             # utils.savefig(__file__, fig, suffix=autorewards_name)
         fig.subplots_adjust(left=0.15, right=0.98, bottom=0.24, top=0.80, wspace=0.1)
         fig.supylabel("Response probability", fontsize=8, x=0.02, y=0.52, va="center")
-        fig.supxlabel("N target trials relative to context change", fontsize=8, x=0.56, y=0.04)
+        fig.supxlabel("N target trials relative to context switch", fontsize=8, x=0.56, y=0.04)
         return fig, pl.DataFrame(transition_stats_rows)
 
     return (plot,)
