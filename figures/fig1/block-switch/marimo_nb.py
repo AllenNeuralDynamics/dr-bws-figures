@@ -22,7 +22,6 @@ app = marimo.App(width="full")
 @app.cell
 def _():
     import pathlib
-    from collections.abc import Iterable
 
     import matplotlib.pyplot as plt
     import matplotlib.style
@@ -96,18 +95,28 @@ def _(np, pl, plt, wilcoxon):
     ) -> None:
         ax.axvline(x=0, color="grey", lw=0.5)
         # Patch the first five post-switch trials.
-        ax.axvspan(xmin=0, xmax=5, color="slateblue", alpha=0.5, lw=0, zorder=-1)
+        ax.axvspan(xmin=0, xmax=4, color="slateblue", alpha=0.5, lw=0, zorder=-1)
         for side in ("right", "top"):
             ax.spines[side].set_visible(False)
         ax.tick_params(direction="out", top=False, right=False)
-        xticks = np.arange(-preTrials, postTrials + 1, 5)
+        xticks = sorted(set(np.arange(-preTrials, postTrials + 1, 5)) - {0} | {-1})
+        xticks = [-15, -1, 5, 10]
+        if is_switch_to_rewarded:
+            xticks.remove(10)
         ax.set_xticks(xticks)
-        ax.set_xticklabels([str(x) if x in (-15, 0, 15) else "" for x in xticks], fontsize=8)
+        if is_switch_to_rewarded:
+            xticklabels = [str(x + 1) if x in (5, ) else str(x) if x in (-15, -1,) else "" for x in xticks]
+        else:
+            xticklabels = [str(x - 4) if x in (5, 10, 15,) else str(x) if x in (-15, -1,) else "" for x in xticks]
+        ax.set_xticklabels(xticklabels, fontsize=8)
         ax.set_yticks([0, 0.5, 1])
         ax.set_yticklabels([0, 0.5, 1], fontsize=8)
         ax.set_xlim([-preTrials - 0.5, postTrials + 0.5])
         ax.set_ylim([0, 1.05])
         ax.tick_params(direction="out", top=False, right=False)
+        if not is_switch_to_rewarded:
+            # Hide the x-axis baseline across the highlighted gap for switches to unrewarded.
+            ax.plot([-0.89, 4.89], [0, 0], color="white", lw=1.0, zorder=250, solid_capstyle="butt", clip_on=False)
 
         # ax.legend(bbox_to_anchor=(1,1),loc='upper left')
         if ax_idx == 1:
@@ -215,7 +224,7 @@ def _(np, pl, plt, wilcoxon):
 
     def plot(trials: pl.DataFrame, late_autorewards: bool | None = None):
         trials_df = trials.clone()
-        fig, axes = plt.subplots(1, 2, figsize=(3, 2), sharex=True, sharey=True)
+        fig, axes = plt.subplots(1, 2, figsize=(3, 2), sharey=True)
         transition_stats_rows = []
         for ax_idx, (ax, stimLbl, clr) in enumerate(
             zip(axes, ("rewarded target stim", "unrewarded target stim"), "kk")
@@ -288,12 +297,11 @@ def _(np, pl, plt, wilcoxon):
                 }
             )
             m = np.nanmean(y, axis=0)
-            # Shift the pre-switch and post-switch traces toward the context
-            # change so the final pre point and first post point both land at
-            # x=0. They must be plotted separately because they can have
-            # different values at that shared x-coordinate.
+            # Position the first post-switch point at x=0 for switches to
+            # rewarded and x=5 for switches to unrewarded, leaving the
+            # highlighted five-trial window at x=0 through x=4.
             pre_x = x[:preTrials]
-            post_x = x[preTrials + 1 :] + (5 if not is_switch_to_rewarded else 0)
+            post_x = x[preTrials + 1 :] + (4 if not is_switch_to_rewarded else -1)
             _meanlinewidth = 0.8
             ax.plot(
                 pre_x,
@@ -310,6 +318,16 @@ def _(np, pl, plt, wilcoxon):
                 linewidth=_meanlinewidth,
                 zorder=99,
             )
+            if not is_switch_to_rewarded:
+                for mouse_y in y:
+                    if not np.isnan(mouse_y[preTrials - 1]) and not np.isnan(mouse_y[preTrials + 1]):
+                        ax.plot(
+                            [pre_x[-1], post_x[0]],
+                            [mouse_y[preTrials - 1], mouse_y[preTrials + 1]],
+                            color="black",
+                            linewidth=0.2,
+                            zorder=98,
+                        )
             # Match point colors to the rewarded/unrewarded annotation colors.
             pre_color, post_color = ("r", "c") if is_switch_to_rewarded else ("c", "r")
             for point_x, point_y, point_color in (
@@ -389,9 +407,9 @@ def _(np, pl, plt, wilcoxon):
             ax.set_zorder(199)
 
             if late_autorewards is not None:
-                autorewards_name = "late-autorewards" if late_autorewards else "early-autorewards"
+                pass
             else:
-                autorewards_name = "all-autorewards"
+                pass
             # utils.savefig(__file__, fig, suffix=autorewards_name)
         fig.subplots_adjust(left=0.15, right=0.98, bottom=0.24, top=0.80, wspace=0.1)
         fig.supylabel("Response probability", fontsize=8, x=0.02, y=0.52, va="center")
