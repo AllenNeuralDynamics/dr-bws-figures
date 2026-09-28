@@ -241,6 +241,7 @@ def _(
         *,
         normalize_probe_lengths: bool = True,
         surface_clearance_mm: float = PROBE_SURFACE_CLEARANCE_MM,
+        show_surface_points: bool = False,
     ):
         """Build a low-point scene from electrode coordinates.
 
@@ -279,27 +280,27 @@ def _(
         assets: dict[str, AssetSpec] = {}
         scene = Scene()
 
-        # PyVista point actors have one material per actor. Render only the
-        # magenta bases; tip coordinates are still used to position the probes.
-        for loc, df, color in (("base", base_df, "#000000"),):
-            asset_key = f"electrodes:{loc}"
+        # The base points sit at the probe/surface intersection. They are
+        # useful for inspection, but are hidden by default in the figure.
+        if show_surface_points:
+            asset_key = "electrodes:base"
             assets[asset_key] = AssetSpec(
                 key=asset_key,
                 kind="points",
                 default_material=Material(
-                    name=f"electrodes-{loc}",
-                    color_hex_str=color,
+                    name="electrodes-base",
+                    color_hex_str="#000000",
                     point_size=10.0,
                 ),
                 points=PointsTransformable(
-                    points_in_scene_mm(df, ml_midline_mm=ml_midline_mm)
+                    points_in_scene_mm(base_df, ml_midline_mm=ml_midline_mm)
                 ),
             )
             scene.upsert(
                 NodeInstance(
                     key=asset_key,
                     asset_key=asset_key,
-                    tags={"electrodes", loc},
+                    tags={"electrodes", "base"},
                 )
             )
 
@@ -382,6 +383,7 @@ def _(
         height: int = 2000,
         normalize_probe_lengths: bool = True,
         surface_clearance_mm: float = PROBE_SURFACE_CLEARANCE_MM,
+        show_surface_points: bool = False,
         camera_zoom: float = 1.25,
     ):
         """Render named anatomical views and save one PNG per view."""
@@ -390,6 +392,7 @@ def _(
             brain=brain,
             normalize_probe_lengths=normalize_probe_lengths,
             surface_clearance_mm=surface_clearance_mm,
+            show_surface_points=show_surface_points,
         )
         plotter = pv.Plotter(
             off_screen=True,
@@ -598,6 +601,7 @@ def _(Path, load_pinpoint_atlas_mesh, on_codeocean):
     width = 2000
     height = 2000
     normalize_probe_lengths = True
+    show_surface_points = False
     camera_zoom = 1.25
     return (
         atlas_name,
@@ -609,6 +613,7 @@ def _(Path, load_pinpoint_atlas_mesh, on_codeocean):
         camera_zoom,
         normalize_probe_lengths,
         output,
+        show_surface_points,
         width,
     )
 
@@ -627,6 +632,7 @@ def _(
     normalize_probe_lengths,
     output,
     render,
+    show_surface_points,
     width,
 ):
     if isinstance(brain, Path):
@@ -646,6 +652,7 @@ def _(
         width=width,
         height=height,
         normalize_probe_lengths=normalize_probe_lengths,
+        show_surface_points=show_surface_points,
         camera_zoom=camera_zoom,
     )
     if isinstance(rendered, list):
