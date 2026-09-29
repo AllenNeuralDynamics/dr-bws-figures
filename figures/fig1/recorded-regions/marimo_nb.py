@@ -29,6 +29,7 @@ def _():
     from dr_datacube import get_lf, get_session_ids_from_github, on_codeocean
 
     datacube_config.use_cache = True
+    plt.rcParams["font.family"] = "Arial"
     results_dir = (
         Path(__file__).resolve().parent
         if not on_codeocean()
