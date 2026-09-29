@@ -142,21 +142,24 @@ def _(group_colors, group_order, pl, results_dir, units, plt):
         markeredgewidth=1,
     )
     ax.set_xlabel("Number of units")
-    ax.set_title("Units per region", pad=22)
-    ax.text(
-        0.5,
-        1.02,
-        "|  Median units / session",
-        transform=ax.transAxes,
-        ha="center",
-        va="bottom",
-        fontsize=8,
-    )
+    ax.set_title("Units per region", pad=8)
     ax.set_xscale("log")
     ax.set_xticks([10, 100, 1000, 10000])
     ax.set_xticklabels(["10", "100", "1000", "10000"])
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
+    top_bar_y = len(labels) - 1
+    ax.set_ylim(-0.5, top_bar_y + 0.25)
+    ax.annotate(
+        "Median units / session",
+        xy=(units_per_region["median_units_per_session"][-1], top_bar_y),
+        xytext=(1000, top_bar_y + 0.2),
+        ha="left",
+        va="bottom",
+        fontsize=7,
+        arrowprops={"arrowstyle": "-", "color": "black", "lw": 0.8},
+        annotation_clip=False,
+    )
     fig.tight_layout()
     fig.savefig(results_dir / "units-per-region.svg", bbox_inches="tight")
     fig.savefig(
