@@ -57,7 +57,7 @@ def _(get_lf, get_session_ids_from_github, pl):
         "Olfactory areas": ["OLF", "AON", "AOB", "MOB", "TT", "TTd", "DP", "PIR", "NLOT1", "NLOT2", "AOBmi", "AOBgl"],
         "Thalamus - sensorimotor": ["VAL", "VM", "VPL", "VPLpc", "VPM", "VPMpc", "MGd", "MGv", "MGm", "LGd", "PP", "PoT", "SPF", "SPFp", "SPFm"],
         "Thalamus - association": ["LP", "PO", "POL", "SGN", "Eth", "AV", "AMd", "AMv", "AD", "IAM", "IAD", "LD", "IMD", "MD", "SMT", "PR", "PVT", "PT", "RE", "Xi", "RH", "PCN", "CM", "CL", "PF", "PIL", "RT", "IGL", "IntG", "LGv", "SubG", "MH", "LH"],
-        "Basal Ganglia": ["CP", "ACB", "OT", "LSc", "LSr", "LSv", "CEAm", "MEA", "SF", "SH", "SFO", "GPe", "GPi", "BST", "MS", "TRS", "NDB", "SI"],
+        "Basal ganglia": ["CP", "ACB", "OT", "LSc", "LSr", "LSv", "CEAm", "MEA", "SF", "SH", "SFO", "GPe", "GPi", "BST", "MS", "TRS", "NDB", "SI"],
         "Hypothalamus": ["LHA", "ZI", "FF", "PSTN", "MPO", "PVH", "PVHd", "PH", "SUM", "Mml", "MPN", "STN", "PeF"],
         "Midbrain": ["SCs", "SCm", "ICd", "ICe", "SAG", "NB", "PBG", "SCO", "MRN", "RN", "APN", "MPT", "NOT", "OP", "PAG", "PPT", "VTA", "SNr", "SNc", "PPN", "PRC", "RR", "DT", "NPC", "CUN", "INC", "DR", "III", "Su3", "AT", "CLI", "IPC", "IPR", "PN", "LT", "MT", "ND", "Pa4"],
         "Hindbrain": ["PCG", "CS", "DTN", "PRNc", "PRNr", "PRNv", "NI", "P", "LDT"],
@@ -73,7 +73,7 @@ def _(get_lf, get_session_ids_from_github, pl):
         "Frontal cortex": "#2B7A3E", "Somatomotor cortex": "#5EBA47", "Lateral cortex": "#98C13D",
         "Visual cortex": "#1E7B7B", "Medial cortex": "#45A87E", "Auditory cortex": "#3E9B9B",
         "Cortical subplate": "#2EC4B6", "Hippocampal formation": "#7B68AE", "Olfactory areas": "#A7A844",
-        "Thalamus - sensorimotor": "#E05B5B", "Thalamus - association": "#F49D6E", "Basal Ganglia": "#4A6FA5",
+        "Thalamus - sensorimotor": "#E05B5B", "Thalamus - association": "#F49D6E", "Basal ganglia": "#4A6FA5",
         "Hypothalamus": "#C93C2B", "Midbrain": "#9B2D9B", "Hindbrain": "#D4A82E", "Medulla": "#8B5E2B",
     }
 
