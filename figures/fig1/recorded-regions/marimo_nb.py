@@ -142,7 +142,7 @@ def _(group_colors, group_order, pl, results_dir, units, plt):
         markersize=8,
         markeredgewidth=1,
     )
-    ax.set_xlabel("Total units per region")
+    ax.set_xlabel("N units per region")
     ax.set_xscale("log")
     ax.set_xticks([10, 100, 1000, 10000])
     ax.set_xticklabels(["10", "100", "1000", "10000"])
