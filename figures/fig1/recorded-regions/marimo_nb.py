@@ -149,11 +149,11 @@ def _(group_colors, group_order, pl, results_dir, units, plt):
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
     top_bar_y = len(labels) - 1
-    ax.set_ylim(-0.5, top_bar_y + 0.25)
+    ax.set_ylim(-0.5, top_bar_y + 0.8)
     ax.annotate(
         "Median units / session",
         xy=(units_per_region["median_units_per_session"][-1], top_bar_y),
-        xytext=(1000, top_bar_y + 0.2),
+        xytext=(1000, top_bar_y + 0.58),
         ha="left",
         va="bottom",
         fontsize=7,
