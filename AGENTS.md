@@ -21,6 +21,7 @@
 - #D0B9DB 
 
 ## Figure text
+- Arial
 - axis labels and titles:sentence case (first letter and proper nounscapitalized)
 - tick labels typically lower case
 - 
