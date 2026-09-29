@@ -26,8 +26,8 @@ def _():
     import matplotlib.style
     import numpy as np
     import polars as pl
+    from dr_datacube import config as datacube_config
     from dr_datacube import (
-        datacube_config,
         get_lf,
         get_session_ids_from_github,
         on_codeocean,
@@ -188,8 +188,11 @@ def _(pl, target_response_rate_agg):
 
 @app.cell
 def _():
-    colors = {"vis": "#0000ff", "aud": "#ec008c"}
-    colors = {"vis": "green", "aud": "magenta"}
+    # Use stimulus colors for response traces and context colors for block headers.
+    colors = {"vis": "#BF00BF", "aud": "#2ca02c"}
+    stimulus_labels = {"vis": "V+", "aud": "A+"}
+    context_colors = {"vis": "#4258A7", "aud": "#F36B10"}
+    context_backgrounds = {"vis": "#E6E7E8", "aud": "white"}
     figure_kwargs = {"figsize": (1.75, 2)}
 
     def format_ax(ax, data, targets):
@@ -212,7 +215,7 @@ def _():
                 block_index + 0.5,
                 ymin=1,
                 ymax=1.08,
-                facecolor="0.85" if rewarded_modality == "vis" else "white",
+                facecolor=context_backgrounds[rewarded_modality],
                 edgecolor="0.6",
                 linewidth=0.5,
                 clip_on=False,
@@ -220,11 +223,12 @@ def _():
             ax.text(
                 block_index,
                 1.04,
-                "A" if rewarded_modality == "aud" else "V",
+                "AUD" if rewarded_modality == "aud" else "VIS",
                 transform=ax.get_xaxis_transform(),
                 ha="center",
                 va="center",
                 fontsize=6,
+                color=context_colors[rewarded_modality],
                 clip_on=False,
             )
         for side in ("right", "top"):
@@ -232,7 +236,7 @@ def _():
         ax.tick_params(direction="out", top=False, right=False, labelsize=8)
         # if len(targets) == 2:
         #     ax.legend(frameon=False)
-    return colors, figure_kwargs, format_ax
+    return colors, figure_kwargs, format_ax, stimulus_labels
 
 
 @app.cell
@@ -246,6 +250,7 @@ def _(
     pl,
     plt,
     results_dir,
+    stimulus_labels,
     subject_traces,
     target_response_rate,
 ):
@@ -305,7 +310,7 @@ def _(
             # marker=".",
             markersize=2,
             linewidth=_meanlinewidth,
-            label=f"{_target} target",
+            label=f"{stimulus_labels[_target]} target",
             zorder=3,
             clip_on=False,
         )
@@ -354,6 +359,7 @@ def _(
     pl,
     plt,
     results_dir,
+    stimulus_labels,
     subject_traces,
     target_response_rate,
 ):
@@ -516,7 +522,7 @@ def _(
             # marker=".",
             markersize=2,
             linewidth=_meanlinewidth,
-            label=f"{_modality}",
+            label=stimulus_labels[_modality],
             zorder=3,
             clip_on=False,
         )

@@ -11,7 +11,7 @@
 # ]
 #
 # [tool.uv.sources]
-# aind-low-point = { git = "https://github.com/AllenNeuralDynamics/aind-low-point" }
+# aind-low-point = { git = "https://github.com/AllenNeuralDynamics/aind-low-point", rev = "7a6b61836bd3b47f0a82191832659c28f2c4d81f" }
 # dr-datacube = { git = "https://github.com/AllenNeuralDynamics/dr-datacube" }
 # ///
 
@@ -120,7 +120,7 @@ def _(
     trimesh,
 ):
     PROBE_LENGTH_MM = 3.840
-    PROBE_RADIUS_MM = 0.0035
+    PROBE_RADIUS_MM = 0.0042
     PROBE_SURFACE_CLEARANCE_MM = 0.6
 
     def load_electrodes(
@@ -337,7 +337,7 @@ def _(
                 kind="mesh",
                 default_material=Material(
                     name="probe",
-                    color_hex_str="#424242",
+                    color_hex_str="#000000",
                     opacity=1.0,
                 ),
                 mesh=MeshTransformable(make_probe_mesh(probe_length)),
@@ -553,13 +553,13 @@ def _(Config, DracoPy, UNSIGNED, boto3, csv, io, json, np, trimesh):
 @app.cell
 def _(load_electrodes):
     from dr_datacube import (
-        datacube_config,
+        config,
         get_lf,
         get_session_ids_from_github,
         on_codeocean,
     )
 
-    datacube_config.use_cache = True
+    config.use_cache = True
     electrodes_df = load_electrodes(
         get_lf=get_lf,
         get_session_ids_from_github=get_session_ids_from_github,
