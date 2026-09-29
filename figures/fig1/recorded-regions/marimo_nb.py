@@ -150,20 +150,24 @@ def _(group_colors, group_order, pl, results_dir, units, plt):
     ax.spines["right"].set_visible(False)
     top_bar_y = len(labels) - 1
     ax.set_ylim(-0.8, top_bar_y + 1.1)
-    ax.annotate(
+    median_x = units_per_region["median_units_per_session"][-1]
+    label_x = 1100
+    label_y = top_bar_y + 0.92
+    ax.plot(
+        [median_x, label_x],
+        [top_bar_y, label_y],
+        color="black",
+        lw=0.8,
+        clip_on=False,
+    )
+    ax.text(
+        label_x,
+        label_y,
         "Median units / session",
-        xy=(units_per_region["median_units_per_session"][-1], top_bar_y),
-        xytext=(1100, top_bar_y + 0.92),
         ha="left",
         va="center",
         fontsize=7,
-        arrowprops={
-            "arrowstyle": "-",
-            "color": "black",
-            "lw": 0.8,
-            "shrinkA": 0,
-        },
-        annotation_clip=False,
+        clip_on=False,
     )
     fig.tight_layout()
     fig.savefig(results_dir / "units-per-region.svg", bbox_inches="tight")
