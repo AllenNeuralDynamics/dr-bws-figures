@@ -156,7 +156,7 @@ def _(group_colors, group_order, pl, results_dir, units, plt):
     ax.plot(
         [median_x, label_x],
         [top_bar_y, label_y],
-        color="black",
+        color="#808080",
         lw=0.8,
         clip_on=False,
     )
