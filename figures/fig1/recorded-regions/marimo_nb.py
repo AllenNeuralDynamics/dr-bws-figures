@@ -130,7 +130,7 @@ def _(group_colors, group_order, pl, results_dir, units, plt):
         .sort("n_units")
     )
 
-    fig, ax = plt.subplots(figsize=(4, 2.8))
+    fig, ax = plt.subplots(figsize=(5.5, 2.8))
     labels = units_per_region["structure_group"].to_list()
     ax.barh(labels, units_per_region["n_units"], color="white", edgecolor="black")
     ax.plot(
@@ -140,6 +140,7 @@ def _(group_colors, group_order, pl, results_dir, units, plt):
         color="black",
         markersize=8,
         markeredgewidth=1,
+        label="Median units / session",
     )
     ax.set_xlabel("Number of units")
     ax.set_title("Units per region")
@@ -148,9 +149,21 @@ def _(group_colors, group_order, pl, results_dir, units, plt):
     ax.set_xticklabels(["10", "100", "1000", "10000"])
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
-    fig.tight_layout()
-    fig.savefig(results_dir / "units-per-region.svg")
-    fig.savefig(results_dir / "units-per-region.png", dpi=300, transparent=True)
+    ax.legend(
+        loc="upper left",
+        bbox_to_anchor=(1.02, 1),
+        frameon=False,
+        handlelength=1.2,
+        borderaxespad=0,
+    )
+    fig.subplots_adjust(left=0.42, right=0.72, top=0.80, bottom=0.23)
+    fig.savefig(results_dir / "units-per-region.svg", bbox_inches="tight")
+    fig.savefig(
+        results_dir / "units-per-region.png",
+        dpi=300,
+        transparent=True,
+        bbox_inches="tight",
+    )
     units_per_region.write_csv(results_dir / "units-per-region.csv")
     fig
 
