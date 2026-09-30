@@ -580,8 +580,8 @@ def _(np, pl, plt, wilcoxon):
             last_rewarded,
             facecolors="none",
             edgecolors="#d62728",
-            linewidths=1.0,
-            s=12,
+            linewidths=0.5,
+            s=6,
             zorder=2,
         )
         ax.scatter(
@@ -589,8 +589,8 @@ def _(np, pl, plt, wilcoxon):
             first_unrewarded,
             facecolors="none",
             edgecolors="#d62728",
-            linewidths=1.0,
-            s=12,
+            linewidths=0.5,
+            s=6,
             zorder=2,
         )
 
