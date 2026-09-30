@@ -188,11 +188,12 @@ def _(pl, target_response_rate_agg):
 
 @app.cell
 def _():
-    # Use stimulus colors for response traces and context colors for context ticks.
-    colors = {"vis": "#BF00BF", "aud": "#2ca02c"}
+    # Use stimulus colors for response traces and context colors for block headers.
+    colors = {"vis": "#2ca02c", "aud": "#BF00BF"}
     stimulus_labels = {"vis": "V+", "aud": "A+"}
     context_colors = {"vis": "#4258A7", "aud": "#F36B10"}
-    figure_kwargs = {"figsize": (1.75, 2.25)}
+    context_backgrounds = {"vis": "#E6E7E8", "aud": "white"}
+    figure_kwargs = {"figsize": (1.75, 2)}
 
     def format_ax(ax, data, targets):
         block_modalities = (
@@ -203,52 +204,35 @@ def _():
         )
         block_ticks = [block_index for block_index, _ in block_modalities]
         ax.set(
-            xlabel="",
+            xlabel="Block #",
             xticks=block_ticks,
             xticklabels=[str(block_index + 1) for block_index in block_ticks],
             xlim=(block_ticks[0] - 0.5, block_ticks[-1] + 0.5),
         )
-        context_axis = ax.secondary_xaxis("bottom")
-        context_axis.set_xticks(block_ticks)
-        context_axis.set_xticklabels(
-            [
-                "A" if rewarded_modality == "aud" else "V"
-                for _, rewarded_modality in block_modalities
-            ]
-        )
-        context_axis.spines["bottom"].set_position(("outward", 16))
-        context_axis.spines["bottom"].set_visible(False)
-        context_axis.tick_params(axis="x", direction="out", pad=0, length=0)
-        for tick_label, (_, rewarded_modality) in zip(
-            context_axis.get_xticklabels(), block_modalities
-        ):
-            tick_label.set_color(context_colors[rewarded_modality])
+        for block_index, rewarded_modality in block_modalities:
+            ax.axvspan(
+                block_index - 0.5,
+                block_index + 0.5,
+                ymin=1,
+                ymax=1.08,
+                facecolor=context_backgrounds[rewarded_modality],
+                edgecolor="none",
+                clip_on=False,
+            )
+            ax.text(
+                block_index,
+                1.04,
+                "AUD" if rewarded_modality == "aud" else "VIS",
+                transform=ax.get_xaxis_transform(),
+                ha="center",
+                va="center",
+                fontsize=6,
+                color=context_colors[rewarded_modality],
+                clip_on=False,
+            )
         for side in ("right", "top"):
             ax.spines[side].set_visible(False)
-        ax.tick_params(
-            axis="x", which="major", direction="out", bottom=True, labelbottom=True, pad=1
-        )
-        ax.text(
-            0,
-            -0.075,
-            "Block #",
-            transform=ax.transAxes,
-            ha="right",
-            va="center",
-            fontsize=8,
-            clip_on=False,
-        )
-        ax.text(
-            0,
-            -0.18,
-            "Context",
-            transform=ax.transAxes,
-            ha="right",
-            va="center",
-            fontsize=8,
-            clip_on=False,
-        )
-        ax.tick_params(axis="y", direction="out", right=False, labelsize=8)
+        ax.tick_params(direction="out", top=False, right=False, labelsize=8)
         # if len(targets) == 2:
         #     ax.legend(frameon=False)
     return colors, figure_kwargs, format_ax, stimulus_labels
