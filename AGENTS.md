@@ -13,8 +13,8 @@
 - "AUD":  "#F36B10" (white background)
 
 ### Stimulus
-- "V+":  #BF00BF ('m' in matplotlib, not 'magenta')
-- "A+":  #2ca02c ('tab:g' in matplotlib, not 'g')
+- "A+":  #BF00BF ('m' in matplotlib, not 'magenta')
+- "V+":  #2ca02c ('tab:g' in matplotlib, not 'g')
 - "V-"/"A-": #000000
 
 ### Instruction trial patch
