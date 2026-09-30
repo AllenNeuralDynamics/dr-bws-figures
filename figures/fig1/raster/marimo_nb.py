@@ -171,8 +171,8 @@ def _(np):
 def _(make_psth, np, patches, pl, plt):
     VIS_CONTEXT_COLOR = "#4258A7"
     AUD_CONTEXT_COLOR = "#F36B10"
-    VIS_TARGET_COLOR = "#BF00BF"
-    AUD_TARGET_COLOR = "#2ca02c"
+    VIS_TARGET_COLOR = "#2ca02c"
+    AUD_TARGET_COLOR = "#BF00BF"
     INSTRUCTION_COLOR = "#D0B9DB"
 
     def add_unit_spikes(trials_for_session, spike_times, x_min):
