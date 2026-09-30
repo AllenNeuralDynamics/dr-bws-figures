@@ -434,7 +434,7 @@ def _(
 
     format_ax(_ax, _subject_data, [])
     _ax.set(
-        ylabel="Cross-modality d'",
+        ylabel="Cross-modal d'",
         ylim=(-3.5, 3.5),
     )
     _ax.axhline(0, lw=0.5, zorder=0, c="grey")
