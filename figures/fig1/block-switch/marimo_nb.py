@@ -574,14 +574,14 @@ def _(np, pl, plt, wilcoxon):
         point_jitter = np.linspace(-0.08, 0.08, len(last_rewarded))
 
         for last_value, first_value in zip(last_rewarded, first_unrewarded):
-            ax.plot([0, 1], [last_value, first_value], color="0.35", linewidth=0.45, alpha=0.55)
+            ax.plot([0, 1], [last_value, first_value], color="0.35", linewidth=0.8, alpha=0.55)
         ax.scatter(
             point_jitter,
             last_rewarded,
             facecolors="none",
             edgecolors="#d62728",
-            linewidths=0.5,
-            s=4,
+            linewidths=1.0,
+            s=12,
             zorder=2,
         )
         ax.scatter(
@@ -589,8 +589,8 @@ def _(np, pl, plt, wilcoxon):
             first_unrewarded,
             facecolors="none",
             edgecolors="#d62728",
-            linewidths=0.5,
-            s=4,
+            linewidths=1.0,
+            s=12,
             zorder=2,
         )
 
