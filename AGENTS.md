@@ -25,3 +25,6 @@
 - axis labels and titles:sentence case (first letter and proper nounscapitalized)
 - tick labels typically lower case
 
+## Data access
+- use `dr_datacube.get_lf()`(https://github.com/allenneuraldynamics/dr-datacube) to access data. Use `dr_datacube.config.anon` if AWS credentials are not available.
+
